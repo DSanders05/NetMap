@@ -1,1 +1,7 @@
-#include "../pigpio_master/pigpiod"
+
+int main(int argc, char* argv[])
+{
+
+
+    return 0;
+}
