@@ -95,8 +95,8 @@ public:
 
     // Error: Returns < 0
 
-    int step_motor(bool clockwise);
-    // Function to step motor in provided direction and then update
+    int activate_motor(bool clockwise);
+    // Function to activate motor in provided direction and then update
     // heading to reflect the changes
 
     // Precondition: heading_initialized={true};

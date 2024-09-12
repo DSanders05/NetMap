@@ -1,13 +1,32 @@
 #include <iostream>
 #include "./pigpiod_if2.h"
 
+/* 
+   TODO LIST
+   Complete motor activation function
+   Complete Heading init function
+   Get Heading function
+   Change Mode Function
+
+   
+   COMPLETED LIST
+   Pin setup function
+   Init Motor Function
+   Default Motor_Controller Constructor
+   Custom Motor_Controller Constructor
+   Motor_Controller De-Constructor
+   Release Controller Function
+
+*/
+
 #include "./motor_controller.hpp"
-#define GPIO_LIM_SW_PIN 25          // Physical Pin - 22
+#define GPIO_LIM_SW_PIN 25          // Physical Pin - 22     ####NEED TO DOUBLE CHECK THESE PIN LOCATIONS####
 #define GPIO_DIR_PIN 22             // Physical Pin - 15
 #define GPIO_PUL_PIN 15             // Physical Pin - 10
 
-/* Motor Controller Functions */
 
+
+/* Motor Controller Functions */
 Motor_Controller::Motor_Controller()
 {
     initialize_motor_controller(GPIO_PUL_PIN,GPIO_LIM_SW_PIN,GPIO_PUL_PIN);
@@ -38,21 +57,34 @@ int Motor_Controller::initialize_motor_controller(int pulse={GPIO_PUL_PIN},int l
     pulse_pin = {pulse};
     lim_sw_pin = {limit_switch_pin};
     direction_pin = {direction};
+
     std::cout << "Motor Controller GPIO initialized successfully" << std::endl;
     return 0;
 }
 
 int Motor_Controller::claim_pins()
 {
-    set_mode(board_address,pulse_pin,PI_INPUT);
     set_mode(board_address,lim_sw_pin,PI_INPUT);
+    set_pull_up_down(board_address,lim_sw_pin,PI_PUD_DOWN);
+
+    set_mode(board_address,pulse_pin,PI_INPUT);
     set_mode(board_address,direction_pin,PI_INPUT);
+    return 0;
+}
+
+int Motor_Controller::activate_motor(bool rot_direction)
+{
+    if (gpio_read(board_address,direction_pin) != rot_direction)
+    {
+        /* If direction_pin does not match rot_direction (clockwise var) */
+        
+    }
+    
     return 0;
 }
 
 int Motor_Controller::initialize_heading()
 {
-
     return 0;
 }
 
@@ -78,31 +110,7 @@ int Motor_Controller::update_heading(int new_heading)
     return 0;
 }
 
-int Motor_Controller::step_motor(bool rot_direction)
-{
-    return 0;
-}
-
 int Motor_Controller::change_mode(int new_mode)
 {
-    if (new_mode < 0 || new_mode > 1)
-    {
-        std::cout << "Mode can only be switched between 0 (autonomous) and 1 (user-controlled) modes." << std::endl;
-        return -1;
-    }
-    else if (control_mode == new_mode && new_mode == 0)
-    {
-        std::cout << "The Motor Controller is already in autonomous mode. Change to mode 1 for user-controlled mode." << std::endl;
-        return 0;
-    }
-    else if (control_mode == new_mode && new_mode ==1)
-    {
-        std::cout << "The Motor Controller is already in user-controlled mode. Change to mode 0 for autonomous mode." << std::endl;
-        return 0;
-    }
-    else
-    {
-        control_mode={new_mode};
-        return 0;
-    }
+    return 0;
 }
