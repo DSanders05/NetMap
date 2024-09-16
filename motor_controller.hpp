@@ -77,23 +77,17 @@ public:
 
     // Error: Returns < 0
 
-    int get_heading() const;
-    // Function to return the current heading
+    gpioAlertFunc_t heading_callback(int,int,uint32_t);
+    // Callback function for when GPIO Alert is triggered by limit switch
 
-    // Precondition: heading_initialized={true};
+    // Precondition: limit switch must be enabled
 
-    // Postcondition: Returns current heading if initialized
+    // Postcondition: heading_initialized={true};
+    //                lim_sw_pin disabled
 
-    // Error: Returns < 0
+    // Error throws an exception
 
-    int update_heading(int);
-    // Function to update the current heading
-
-    // Precondition: heading_initialized={true};
-
-    // Postcondition: Updates heading if initialized
-
-    // Error: Returns < 0
+    void scan_area();
 
     int activate_motor(bool clockwise);
     // Function to activate motor in provided direction and then update
@@ -105,10 +99,12 @@ public:
 
     // Error: Returns < 0
 
-    int release_controller(int);
-    // Function to end pigpio daemon
+    int get_heading() const;
+    // Function to return the current heading
 
-    // Postcondition: Pigpio daemon stopped
+    // Precondition: heading_initialized={true};
+
+    // Postcondition: Returns current heading if initialized
 
     // Error: Returns < 0
 
@@ -118,6 +114,13 @@ public:
     // Precondition: heading_initialized={true};
 
     // Postcondition: control_mode={new_mode};
+
+    // Error: Returns < 0
+
+    int release_controller(int);
+    // Function to end pigpio daemon
+
+    // Postcondition: Pigpio daemon stopped
 
     // Error: Returns < 0
 };
