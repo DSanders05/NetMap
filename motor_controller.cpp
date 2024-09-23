@@ -1,5 +1,6 @@
 #include <iostream>
 #include "./pigpiod_if2.h"
+#include "./motor_controller.hpp"
 
 /* 
    TODO LIST
@@ -21,9 +22,8 @@
 
 */
 
-#include "./motor_controller.hpp"
-#define GPIO_LIM_SW_PIN 25          // Physical Pin - 22     ####NEED TO DOUBLE CHECK THESE PIN LOCATIONS####
-#define GPIO_DIR_PIN 22             // Physical Pin - 15
+#define GPIO_LIM_SW_PIN 25          // Physical Pin - 22     #### THESE PIN LOCATIONS COME FROM NOAH's FILE ####
+#define GPIO_DIR_PIN 22             // Physical Pin - 15    HIGH IS CW, LOW IS CCW
 #define GPIO_PUL_PIN 15             // Physical Pin - 10
 
 #define MID 176                     // (Degrees) 
@@ -97,33 +97,87 @@ gpioAlertFunc_t Motor_Controller::heading_callback(int gpio,int level,uint32_t t
     return;
 }
 
-void Motor_Controller::scan_area()
+void Motor_Controller::scan_area()      // NEED TO FINISH
 {
+    /*
+        Start at 0
+        Scan clockwise until 360 degrees
+        Reverse direction
+        Scan back other way
+
+        Wait 30 sec.
+        Repeat
+    */
+   
+    bool looping={true};
+   
+    if (heading_initialized == false)
+        {
+            std::cerr << "Unable to scan. Initialize heading first." << std::endl;
+            return;
+        }
+
+    for (size_t i = 0; i < 60; i++)
+    {
+        activate_motor();
+        heading += (1*DEG_TO_STEPS);
+    }
+    
+    // while (looping)
+    // {
+        
+    //     if ((heading - 180) > 0)
+    //     {
+            
+    //     }
+        
+    //        activate_motor();
+    // }
+    
+    gpio_write(board_address,pulse_pin,PI_LOW);
+}
+
+void Motor_Controller::scan_area(int target_dir)  // FINISH LAST
+{
+    if ((gpio_read(board_address,direction_pin)+target_dir) % 2 > 0)
+    {
+        gpio_write(board_address,direction_pin,target_dir);
+    }
+    
     /*
         Scan 360 degrees
         Wait 30 seconds
         Scan 360 degrees in opposite direction
     */
-   activate_motor(clockwise);
+   activate_motor();
 }
 
-int Motor_Controller::activate_motor(bool rot_direction)
+void Motor_Controller::activate_motor()
 {
     /*  
-        check intended direction against current pin level
-        if intended direction and pin level do not match, change pin level
-        activate motor
-        deactivate motor after step?
+        activate motor for one step and deactivate
+        deactivate motor after step
     */
 
-    if (gpio_read(board_address,direction_pin) != rot_direction)
+    try
     {
-        gpio_write(board_address,direction_pin,rot_direction);
+        gpio_write(board_address,pulse_pin,PI_HIGH);
     }
-
-    gpio_write(board_address,pulse_pin,PI_HIGH);
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
     
-    return 0;
+    time_sleep(0.001);
+
+    try
+    {
+        gpio_write(board_address,pulse_pin,PI_LOW);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 }
 
 int Motor_Controller::get_heading() const

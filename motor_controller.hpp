@@ -88,8 +88,26 @@ public:
     // Error throws an exception
 
     void scan_area();
+    // Non-Directional Scan area function to evaluate possible GV locations within area
+    // Once full circle has been made, wait defined amount of time and repeat 
+    // in reverse direction.
 
-    int activate_motor(bool clockwise);
+    // Precondition: heading_initialized={true};
+
+    // Postcondition: 
+
+    // Error: throw error
+
+    void scan_area(int target);
+    // Directional Scan based on target (degree value) location
+
+    // Precondition: heading_initialized={true};
+
+    // Postcondition: heading == target
+
+    // Error: throw error
+
+    void activate_motor();
     // Function to activate motor in provided direction and then update
     // heading to reflect the changes
 
@@ -124,4 +142,5 @@ public:
 
     // Error: Returns < 0
 };
+
 #endif
