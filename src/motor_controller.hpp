@@ -46,7 +46,7 @@ public:
     // Postcondition: Motor Controller is destroyed
     // and the pigpio connection is also ended.
 
-    int initialize_motor_controller(int pul,int lim_sw,int dir);
+    int initialize_motor_controller(int, int, int);
     // Function to set Controller Variables
 
     // Precondition: Function must be called by the instantiation
@@ -69,7 +69,7 @@ public:
 
     // Postcondition: 
 
-    int initialize_heading();
+    void initialize_heading();
     // Function to initialize heading of antenna 
 
     // Postcondition: heading_initialized={true};
@@ -77,7 +77,7 @@ public:
 
     // Error: Returns < 0
 
-    gpioAlertFunc_t heading_callback(int,int,uint32_t);
+    static void heading_callback(int,int,uint32_t,void*);
     // Callback function for when GPIO Alert is triggered by limit switch
 
     // Precondition: limit switch must be enabled
@@ -135,7 +135,7 @@ public:
 
     // Error: Returns < 0
 
-    int release_controller(int);
+    void release_controller(int);
     // Function to end pigpio daemon
 
     // Postcondition: Pigpio daemon stopped

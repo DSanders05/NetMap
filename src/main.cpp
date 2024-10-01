@@ -1,4 +1,5 @@
-#include "./motor_controller.cpp"
+#include <iostream>
+#include "./motor_controller.hpp"
 
 int main(int argc, char* argv[])
 {
