@@ -35,6 +35,10 @@
 
 #define STEPS_PER_REV 360/1200
 
+Motor_Controller::Motor_Controller()
+{
+    initialize_motor_controller(GPIO_PUL_PIN,GPIO_LIM_SW_PIN,GPIO_DIR_PIN);
+}
 
 /* Motor Controller Functions */
 Motor_Controller::Motor_Controller(int pulse={GPIO_PUL_PIN},int limit_switch_pin={GPIO_LIM_SW_PIN}, int direction={GPIO_DIR_PIN})
@@ -79,9 +83,14 @@ int Motor_Controller::claim_pins()
 
 void Motor_Controller::initialize_heading()
 {
-    gpio_write(board_address,direction_pin,clockwise);
-    gpio_write(board_address,pulse_pin,PI_HIGH);
     gpioSetAlertFuncEx(board_address,Motor_Controller::heading_callback,this);
+    gpio_write(board_address,direction_pin,clockwise);
+
+    while (!heading_initialized)
+    {
+        activate_motor();
+    }
+    
     std::cout << "Heading is initialized." << std::endl;
 }
 

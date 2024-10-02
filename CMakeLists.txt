@@ -1,11 +1,13 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.1)
 
-project(
-    "netmap"
-    VERSION 1.0
-    DESCRIPTION "A project to control the high gain antenna and provide GUI functionality."
-    LANGUAGE CXX)
+project(MotorControlProject 
+    LANGUAGES CXX)
 
-add_executable(netmap.exe)
+add_executable(motor_test)
 
-target_sources()
+target_sources(motor_test PRIVATE src/main.cpp src/motor_controller.cpp src/motor_controller.hpp)
+
+find_library(PIGPIOD_IF_LIB pigpiod_if2)
+find_library(PIGPIO_LIB pigpio)
+
+target_link_libraries(motor_test ${PIGPIO_LIB} ${PIGPIOD_IF_LIB})

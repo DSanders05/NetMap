@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #ifndef MOTOR_CONTROLLER_H
 #define MOTOR_CONTROLLER_H
