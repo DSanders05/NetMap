@@ -23,9 +23,9 @@
 */
 // IP for antenna 130.74.33.50
 
-#define GPIO_LIM_SW_PIN 25          // Physical Pin - 22     #### THESE PIN LOCATIONS COME FROM NOAH's FILE ####
-#define GPIO_DIR_PIN 22             // Physical Pin - 15    HIGH IS CW, LOW IS CCW
-#define GPIO_PUL_PIN 15             // Physical Pin - 10
+#define GPIO_LIM_SW_PIN 22          // Physical Pin - 22
+#define GPIO_DIR_PIN 18             // Physical Pin - 15    HIGH IS CW, LOW IS CCW
+#define GPIO_PUL_PIN 24             // Physical Pin - 10
 
 #define MID 176                     // (Degrees) 
 #define READ_PERIOD 0.1             // (Seconds) Time between reads AND min time between steps?
@@ -67,14 +67,18 @@ int Motor_Controller::initialize_motor_controller(int pulse, int limit_switch_pi
     lim_sw_pin = {limit_switch_pin};
     direction_pin = {direction};
 
-    std::cout << "Motor Controller GPIO initialized successfully" << std::endl;
+    std::cout << "Motor Controller GPIO initialized successfully. Board Number: " << board_address << std::endl;
     return 0;
 }
 
 int Motor_Controller::claim_pins()
 {
+    int resistor_set;
+
     set_mode(board_address,lim_sw_pin,PI_INPUT);
-    set_pull_up_down(board_address,lim_sw_pin,PI_PUD_DOWN);
+    set_mode(board_address,lim_sw_pin,PI_PUD_UP);
+    
+    set_glitch_filter(board_address,22,0500);
 
     set_mode(board_address,pulse_pin,PI_INPUT);
     set_mode(board_address,direction_pin,PI_INPUT);
@@ -83,7 +87,7 @@ int Motor_Controller::claim_pins()
 
 void Motor_Controller::initialize_heading()
 {
-    gpioSetAlertFuncEx(board_address,Motor_Controller::heading_callback,this);
+    callback_ex(board_address,GPIO_LIM_SW_PIN,0,Motor_Controller::heading_callback,this);
     gpio_write(board_address,direction_pin,clockwise);
 
     while (!heading_initialized)
@@ -94,13 +98,14 @@ void Motor_Controller::initialize_heading()
     std::cout << "Heading is initialized." << std::endl;
 }
 
-void Motor_Controller::heading_callback(int gpio,int level,uint32_t tick,void* user_data)
+void Motor_Controller::heading_callback(int pi,unsigned int pin,unsigned int level,uint32_t tick,void* user_data)
 {
     Motor_Controller* controller = static_cast<Motor_Controller*>(user_data);
+    std::cout << "Controller->board_address: " << controller->board_address << std::endl;
     gpio_write(controller->board_address,controller->pulse_pin,PI_LOW);  
-    std::cout << "GPIO Pin " << gpio << " changed output levels at: " << tick << std::endl;
+    std::cout << "GPIO Pin " << pi << " changed output levels at: " << tick << std::endl;
     controller->heading_initialized={true};
-    set_mode(controller->board_address,controller->lim_sw_pin,PI_OFF);
+    // set_mode(controller->board_address,controller->lim_sw_pin,PI_OFF);
 }
 
 void Motor_Controller::scan_area()      // NEED TO FINISH
@@ -174,7 +179,7 @@ void Motor_Controller::activate_motor()
         std::cerr << e.what() << '\n';
     }
     
-    time_sleep(0.001);
+    time_sleep(0.01);
 
     try
     {

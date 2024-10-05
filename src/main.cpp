@@ -4,8 +4,8 @@
 int main(int argc, char* argv[])
 {
     Motor_Controller controller = Motor_Controller();
+    controller.claim_pins();
     controller.initialize_heading();
-    controller.scan_area();
     controller.get_heading();
 
     // controller.scan_area();

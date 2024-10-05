@@ -77,7 +77,7 @@ public:
 
     // Error: Returns < 0
 
-    static void heading_callback(int,int,uint32_t,void*);
+    static void heading_callback(int,unsigned int,unsigned int,uint32_t,void*);
     // Callback function for when GPIO Alert is triggered by limit switch
 
     // Precondition: limit switch must be enabled
