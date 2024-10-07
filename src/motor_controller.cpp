@@ -23,7 +23,7 @@
 */
 // IP for antenna 130.74.33.50
 
-#define GPIO_LIM_SW_PIN 22          // Physical Pin - 22
+#define GPIO_LIM_SW_PIN 5          // Physical Pin - 29
 #define GPIO_DIR_PIN 18             // Physical Pin - 15    HIGH IS CW, LOW IS CCW
 #define GPIO_PUL_PIN 24             // Physical Pin - 10
 
@@ -78,7 +78,7 @@ int Motor_Controller::claim_pins()
     set_mode(board_address,lim_sw_pin,PI_INPUT);
     set_mode(board_address,lim_sw_pin,PI_PUD_UP);
     
-    set_glitch_filter(board_address,22,0500);
+    set_glitch_filter(board_address,5,0500);
 
     set_mode(board_address,pulse_pin,PI_INPUT);
     set_mode(board_address,direction_pin,PI_INPUT);
@@ -87,7 +87,7 @@ int Motor_Controller::claim_pins()
 
 void Motor_Controller::initialize_heading()
 {
-    callback_ex(board_address,GPIO_LIM_SW_PIN,0,Motor_Controller::heading_callback,this);
+    int cb_id = callback_ex(board_address,GPIO_LIM_SW_PIN,EITHER_EDGE,Motor_Controller::heading_callback,/*this*/NULL);
     gpio_write(board_address,direction_pin,clockwise);
 
     while (!heading_initialized)
@@ -101,11 +101,22 @@ void Motor_Controller::initialize_heading()
 void Motor_Controller::heading_callback(int pi,unsigned int pin,unsigned int level,uint32_t tick,void* user_data)
 {
     Motor_Controller* controller = static_cast<Motor_Controller*>(user_data);
-    std::cout << "Controller->board_address: " << controller->board_address << std::endl;
-    gpio_write(controller->board_address,controller->pulse_pin,PI_LOW);  
-    std::cout << "GPIO Pin " << pi << " changed output levels at: " << tick << std::endl;
-    controller->heading_initialized={true};
-    // set_mode(controller->board_address,controller->lim_sw_pin,PI_OFF);
+
+    if (controller->heading_initialized == true)
+    {
+        std::cout << "Heading has been previously initialized." << std::endl;
+        return;
+    }
+    
+    if (level == PI_HIGH)
+    {
+        controller->heading_initialized={true};
+        controller->heading={0};
+        std::cout << "The current heading is: " << controller->get_heading() << std::endl;
+        gpio_write(controller->board_address,controller->pulse_pin,PI_LOW);  
+        // set_mode(controller->board_address,controller->lim_sw_pin,PI_OFF);
+    }
+    
 }
 
 void Motor_Controller::scan_area()      // NEED TO FINISH
