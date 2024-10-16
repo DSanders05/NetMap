@@ -11,7 +11,7 @@ private:
     bool heading_initialized;       // flag used to track when heading becomes initialized on startup
     bool clockwise;                 // flag to track current turning direction 
     int control_mode;               // 0 - autonomous, 1 - user controlled
-    int heading;                    // current heading relative to antenna's initialized zero
+    double heading;                    // current heading relative to antenna's initialized zero
     int board_address;              // board address returned from pigpio_start
 
 
@@ -117,7 +117,7 @@ public:
 
     // Error: Returns < 0
 
-    int get_heading() const;
+    float get_heading() const;
     // Function to return the current heading
 
     // Precondition: heading_initialized={true};
@@ -125,6 +125,13 @@ public:
     // Postcondition: Returns current heading if initialized
 
     // Error: Returns < 0
+
+    void set_heading(double change);
+    // Function to update the heading variable
+
+    // Precondition: heading_initialized={true}
+
+    // Postcondition: heading = {heading + change};
 
     int change_mode(int new_mode);
     // Function to change the operating mode of the Motor Controller
