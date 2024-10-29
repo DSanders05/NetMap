@@ -3,6 +3,7 @@
 #ifndef MOTOR_CONTROLLER_H
 #define MOTOR_CONTROLLER_H
 
+#include <string>
 
 class Motor_Controller
 {
@@ -20,6 +21,10 @@ private:
     int control_mode;               // 0 - autonomous, 1 - user controlled
     double heading;                    // current heading relative to antenna's initialized zero
     int board_address;              // board address returned from pigpio_start
+
+    std::string antenna_ip = {""};
+    double antenna_lat;
+    double antenna_lon;
 
 
     /* Pins */
