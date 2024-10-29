@@ -1,3 +1,7 @@
 .vscode/
 /build
 antenna_gui.py
+/comms_test/build
+/gps_test/build
+/lim_sw_test/build
+/gps_test/mavlink

@@ -7,6 +7,13 @@
 class Motor_Controller
 {
 private:
+    /* 
+    Create a private variable socket for the motor controller?
+        - No way to differentiate ground vehicles when creating map
+        - Limits the amount of connections for ground vehicles?
+        - How to handle vehicles that are in a line? (this should be tested)
+    */
+
     /* Data Variables */
     bool heading_initialized;       // flag used to track when heading becomes initialized on startup
     bool clockwise;                 // flag to track current turning direction 
