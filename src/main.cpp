@@ -1,8 +1,8 @@
 #include <iostream>
 #include "./motor_controller.hpp"
-// #include <Python.h/>
+#include <pybind11/embed.h>
 
-/* Python API will need to be imported to call python commands */
+namespace py = pybind11;
 
 int main(int argc, char* argv[])
 {
@@ -11,7 +11,8 @@ int main(int argc, char* argv[])
     controller.initialize_heading();
     controller.get_heading();
     controller.scan_area();
-    
+
+
     std::cout << "Test Scan Complete." << std::endl;
 
     return 0;

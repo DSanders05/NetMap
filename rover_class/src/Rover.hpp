@@ -8,6 +8,8 @@
 
 #include <vector>
 #include <string>
+#include "../communications/server/src/server.hpp"
+
 //#include <mavlink> - Import the mavlink message structure so that as we read them in we just bind the whole message to each rover instance?
 
 class Rover
