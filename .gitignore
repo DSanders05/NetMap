@@ -5,3 +5,5 @@ antenna_gui.py
 /gps_test/build
 /lim_sw_test/build
 /gps_test/mavlink
+/user_interface/venv
+/user_interface/__pycache__
