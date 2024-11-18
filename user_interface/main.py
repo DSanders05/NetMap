@@ -1,4 +1,4 @@
-from App import App
+from user_interface.components.App import App
 
 
 if __name__ == "__main__":
