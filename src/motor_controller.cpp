@@ -1,6 +1,6 @@
 #include <iostream>
-#include "./pigpiod_if2.h"
-#include "./motor_controller.hpp"
+#include "../pigpio-master/pigpiod_if2.h"
+#include "../include/motor_controller.hpp"
 
 // IP for antenna 130.74.33.50
 

@@ -1,5 +1,4 @@
-from user_interface.components.App import App
-
+from ui_pages.src import *
 
 if __name__ == "__main__":
     net_map_interface = App()
