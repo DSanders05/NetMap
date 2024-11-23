@@ -12,3 +12,4 @@ antenna_gui.py
 /boot_interface/components/__pycache__
 /boot_interface/venv
 /user_interface/ui_pages/src/__pycache__
+/includes
