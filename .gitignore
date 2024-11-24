@@ -1,15 +1,11 @@
 .vscode/
 /build
+/tests
 antenna_gui.py
-/comms_test/build
-/gps_test/build
-/lim_sw_test/build
-/gps_test/mavlink
 /user_interface/venv
 /user_interface/__pycache__
-/pigpio-master
+/include/pigpio-master
 /NOTES.md
 /boot_interface/components/__pycache__
 /boot_interface/venv
 /user_interface/ui_pages/src/__pycache__
-/includes
