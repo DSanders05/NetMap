@@ -1,6 +1,8 @@
 #include "../include/Server.hpp"
 
-Server::Server(int port) : port(port),server_socket(-1),running(false) {}
+Server::Server(int port = NULL) 
+    : port(port),server_socket(-1),running(false) 
+{}
 
 Server::~Server() {
     Server::stop_server();
@@ -8,8 +10,9 @@ Server::~Server() {
 
 void Server::handle_client(int client_socket)
 {
+    bool handling = {true};
     char buffer[1024];
-    while (true)
+    while (handling)
     {
         memset(buffer,0,sizeof(buffer));
         int bytes_received = recv(client_socket,buffer,sizeof(buffer)-1,0);
@@ -20,24 +23,21 @@ void Server::handle_client(int client_socket)
             break;
         }
         
-        std::string command(buffer);
-        std::cout << "Received command: " << command << std::endl;
+        std::string message(buffer);
+        std::cout << "Received message: " << message << std::endl;
 
         std::string response;
-        if (command == "GET_POSITION")
-        {
-            continue;
-        }
-        else if (command.rfind("MOVE",0) == 0)
-        {
-            continue;
-        }
-        else
-        {
-            continue;
-        }
+        response = ("Message received: " + message);
+        // if (message == "AUTO")
+        // {
+        // }
+        // else
+        // {
+        //     perror("Message not received.");
+        // }
         
         send(client_socket,response.c_str(),response.size(),0);
+        handling = {false};
 
     }
 
@@ -60,19 +60,19 @@ void Server::start_server()
 
     if (bind(server_socket, (sockaddr*)&server_address,sizeof(server_address)) == -1)
     {
-        perror("Binding failed.");
+        perror("Server socket binding failed.");
         return;
     }
 
     if (listen(server_socket,5)==-1)
     {
-        perror("Listening failed.");
+        perror("Socket failed to listening for incoming connections.");
         return;
     }
     
     running = true;
 
-    std::cout << "Server listening on port " << port << std::endl;
+    std::cout << "Server listening on port: " << port << std::endl;
 
     while (running)
     {

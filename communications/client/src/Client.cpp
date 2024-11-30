@@ -1,6 +1,12 @@
 #include "../include/Client.hpp"
 
-Client::Client(const std::string& ip, int port): server_ip(ip), server_port(port), client_socket(-1) {}
+struct command
+{
+    std::string mode;
+    int target;
+};
+
+Client::Client(const std::string& ip = {"192.168.3.10"}, int port = {12024}): server_ip(ip), server_port(port), client_socket(-1) {}
 
 Client::~Client() 
 {
@@ -39,13 +45,14 @@ bool Client::connect_to_server()
     return true;
 }
 
-std::string Client::send_command(const std::string& command) 
+std::string Client::request_data() 
 {
     if (client_socket == -1)
     {
-        return "ERROR: Not connected to server.";
+        perror("ERROR: Not connected to server.");
     }
     
+    std::string command = "DATA REQ";
     send(client_socket, command.c_str(), command.size(),0);
 
     char buffer[1024];
@@ -54,8 +61,31 @@ std::string Client::send_command(const std::string& command)
 
     if (bytes_received <= 0)
     {
-        return "ERROR: Failed to receive response from server.";
+        perror("ERROR: Failed to receive response from server.");
+    }
+
+    return buffer;
+}
+
+std::string Client::send_command(const int& target, const std::string& mode)
+{
+    if (mode != "MANU")
+    {
+        return "ERROR: Not in manual mode.";
+    }
+
+    std::string command = std::to_string(target);
+
+    send(client_socket,command.c_str(),command.size(),0);
+    
+    char buffer[1024];
+    memset(buffer,0,sizeof(buffer));
+    int bytes_received = recv(client_socket,buffer,sizeof(buffer)-1,0);
+
+    if (bytes_received <=0)
+    {
+        return "ERROR: Failed to received response from server.";
     }
     
-    return std::string(buffer);
+    return buffer;
 }

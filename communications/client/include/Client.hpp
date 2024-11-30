@@ -14,12 +14,18 @@ private:
     std::string server_ip;
     int server_port;
 public:
+    Client();
+
     Client(const std::string& ip, int port);
 
     ~Client();
 
     bool connect_to_server();
 
-    std::string send_command(const std::string& command);
+    // std::string send_command(const std::string& command);
+
+    std::string request_data();
+
+    std::string send_command(const int& target,const std::string& mode);
 };
 #endif

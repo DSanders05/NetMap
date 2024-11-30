@@ -1,13 +1,17 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.10)
 
-project(MotorControlProject 
-    LANGUAGES CXX)
+# Project name
+project(NetMap)
 
-add_executable(motor_test)
+# C++ Standard
+set(CMAKE__CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-target_sources(motor_test PRIVATE src/main.cpp src/motor_controller.cpp src/motor_controller.hpp)
+add_subdirectory(app_manager)
+add_subdirectory(communications/client)
+# add_subdirectory(communications/server)
+add_subdirectory(motor_controls)
 
-find_library(PIGPIOD_IF_LIB pigpiod_if2)
-find_library(PIGPIO_LIB pigpio)
+add_executable(net_map main.cpp)
 
-target_link_libraries(motor_test ${PIGPIO_LIB} ${PIGPIOD_IF_LIB})
+target_link_libraries(net_map PRIVATE app_manager client motor_controller)

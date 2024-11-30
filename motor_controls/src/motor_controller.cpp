@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../pigpio-master/pigpiod_if2.h"
+#include <cmath>
 #include "../include/motor_controller.hpp"
 
 // IP for antenna 130.74.33.50
@@ -14,13 +14,11 @@
 #define GPIO_DIR_PIN 18             // Physical Pin - 15    HIGH IS CW, LOW IS CCW
 #define GPIO_PUL_PIN 24             // Physical Pin - 10
 
-#define MID 176                     // (Degrees) 
+// #define MID 176                     // (Degrees) 
 #define WAIT_PERIOD 0.01             // Time between each step
 
 #define STEP_MAX 1200               // Number of steps in full 360 degree rotation
-#define DEG_TO_STEPS STEP_MAX/360   // Convert from degree to steps
-
-#define STEPS_PER_REV 360/1200
+#define DEG_TO_STEPS STEP_MAX/360   // Convert from degree to steps      
 
 Motor_Controller::Motor_Controller()
 {
@@ -48,7 +46,7 @@ int Motor_Controller::initialize_motor_controller(int pulse, int limit_switch_pi
         std::cout << "Unable to initialize Motor Controller GPIO." << std::endl;
         return -1;
     }
-    control_mode={0};
+    control_mode={0}; // 0 - autonomous mode, 1 - manual mode
     clockwise={true};
     heading_initialized={false};
     
@@ -57,21 +55,6 @@ int Motor_Controller::initialize_motor_controller(int pulse, int limit_switch_pi
     direction_pin = {direction};
 
     std::cout << "Motor Controller GPIO initialized successfully. Board Number: " << board_address << std::endl;
-    return 0;
-}
-
-int Motor_Controller::claim_pins()
-{
-    // This function sets the mode for all the pins to be used by the RPi
-    int resistor_set;
-
-    set_mode(board_address,lim_sw_pin,PI_INPUT);
-    set_mode(board_address,lim_sw_pin,PI_PUD_UP);
-    
-    set_glitch_filter(board_address,5,0500);
-
-    set_mode(board_address,pulse_pin,PI_INPUT);
-    set_mode(board_address,direction_pin,PI_INPUT);
     return 0;
 }
 
@@ -89,6 +72,26 @@ void Motor_Controller::initialize_heading()
     }
     
     std::cout << "Heading is initialized." << std::endl;
+}
+
+int Motor_Controller::claim_pins()
+{
+    // This function sets the mode for all the pins to be used by the RPi
+    // int resistor_set;
+
+    set_mode(board_address,lim_sw_pin,PI_INPUT);
+    set_mode(board_address,lim_sw_pin,PI_PUD_UP);
+    
+    set_glitch_filter(board_address,5,0500);
+
+    set_mode(board_address,pulse_pin,PI_INPUT);
+    set_mode(board_address,direction_pin,PI_INPUT);
+    return 0;
+}
+
+void Motor_Controller::release_controller(int board_address)
+{
+    pigpio_stop(board_address);
 }
 
 void Motor_Controller::heading_callback(int pi,unsigned int pin,unsigned int level,uint32_t tick,void* user_data)
@@ -114,86 +117,56 @@ void Motor_Controller::heading_callback(int pi,unsigned int pin,unsigned int lev
     
 }
 
-void Motor_Controller::scan_area()      // NEED TO FINISH
-{
-    /*
-        Start at 0
-        Scan clockwise until 360 degrees
-        Reverse direction
-        Scan back other way 
-        Wait 15 sec.
-        Repeat
-    */
-
-   // TODO - Listen for keyboard interrupt to change modes?
-
-    bool scanning={true};
-   
-     if (heading_initialized == false)
-         {
-             initialize_heading();
-         }
-
-    time_sleep(2);
-    std::cout << "Beginning area scan..." << std::endl;
-    
-
-    while (scanning)
-    {
-        if (clockwise)
-        {
-            clockwise={false};
-            gpio_write(board_address,direction_pin,clockwise);
-        }
-        else
-        {
-            clockwise={true};
-            gpio_write(board_address,direction_pin,clockwise);
-        }
-        
-
-         for (size_t i = 0; i < 1200; i++)
-        {
-            activate_motor();
-            set_heading(0.3f);
-        }
-
-        std::cout << "Heading after first rotation: " << get_heading() << std::endl;
-
-        time_sleep(15);
-
-        if (clockwise)
-        {
-            clockwise={false};
-            gpio_write(board_address,direction_pin,clockwise);
-        }
-        else
-        {
-            clockwise={true};
-            gpio_write(board_address,direction_pin,clockwise);
-        }
-
-        for (size_t i = 0; i < 1200; i++)
-        {
-            activate_motor();
-            set_heading(0.3f);
-        }
-
-        std::cout << "Heading after second rotation: " << get_heading() << std::endl;
-
-        time_sleep(15);
-    }
-    
-    gpio_write(board_address,pulse_pin,PI_LOW);
-}
-
-void Motor_Controller::scan_area(int target)  // FINISH LAST
+void Motor_Controller::rotate_to(int int_target)
 {
     // Change target to double
-    // Find which direction would be more efficient to move in
-    // Change direction
-    // Move to target location and update when target has been reached
-    activate_motor();
+    double target = static_cast<double>(int_target);
+    std::cout << "The provided target is: " << target << std::endl;
+
+    // Determine number of steps to new target
+    int difference = round(std::abs((get_heading() - target)/0.3));
+
+    // If we're rotating CW and going to target will take us below 0
+    // Swap rotation
+    if (clockwise && (get_heading() - target) < 0)
+    {
+        clockwise = {false};
+        gpio_write(board_address,direction_pin,clockwise);
+        std::cout << "Approaching target counter-clockwise." << std::endl;
+
+        for (size_t i = 0; i <= difference; i++)
+        {
+            activate_motor();
+            set_heading(0.3f);
+        }
+    }
+    else if (!clockwise && (get_heading() + target) > 360)
+    {
+        clockwise = {true};
+        gpio_write(board_address,direction_pin,clockwise);
+        std::cout << "Approaching target clockwise." << std::endl;
+
+        for (size_t i = 0; i <= difference; i++)
+        {
+            activate_motor();
+            set_heading(-0.3f);
+        }
+    }    
+}
+
+void Motor_Controller::return_to_zero()
+{
+    // Rotate clockwise back to zero
+    if (!clockwise)
+    {
+        clockwise={true};
+        gpio_write(board_address,direction_pin,clockwise);
+    }
+    
+    while (get_heading() != 0.0)
+    {
+        activate_motor();
+    }
 }
 
 void Motor_Controller::activate_motor()
@@ -225,7 +198,35 @@ void Motor_Controller::activate_motor()
     }
 }
 
-float Motor_Controller::get_heading() const
+bool Motor_Controller::get_heading_init()
+{
+    return heading_initialized;
+}
+
+void Motor_Controller::set_heading_init()
+{
+    if (heading_initialized)
+    {
+        std::cout << "Heading has already been initialized." << std::endl;
+    }
+    else
+    {
+        heading_initialized = {true};
+    }
+    
+}
+
+bool Motor_Controller::get_clockwise()
+{
+    return clockwise;
+}
+
+void Motor_Controller::set_clockwise(bool new_clockwise)
+{
+    clockwise = {new_clockwise};
+}
+
+double Motor_Controller::get_heading()
 {
     // This function returns the heading if it has been initialized
 
@@ -239,7 +240,7 @@ float Motor_Controller::get_heading() const
     }
 }
 
-void Motor_Controller::set_heading(double change)
+void Motor_Controller::set_heading(double increment)
 {
     // If {heading + change} is going to make heading go above 360 degrees
     // then we will need to do 360 - change for update value.
@@ -247,36 +248,25 @@ void Motor_Controller::set_heading(double change)
     // Set_heading does not need to be used for every pulse unless in area_scan function.
 
     // Should we travel back to zero each time we go back into scan_area function?
-    heading = {heading + change};
+    heading = {heading + increment};
 }
 
-int Motor_Controller::change_mode(int new_mode)
+int Motor_Controller::get_ctrl_mode()
 {
-    // This function should change the mode of operation of the antenna
-    // 0 - autonomous mode 
-    // 1 - user controlled mode 
-
-    if (control_mode != new_mode)
-    {
-        control_mode={new_mode};
-    }
-    else if (control_mode == new_mode)
-    {
-        switch (new_mode)
-        {
-        case 0:
-            std::cout << "The antenna is already in autonomous mode." << std::endl;
-            break;
-
-        case 1:
-            std::cout << "The antenna is already in user-controlled mode." << std::endl;
-            break;
-        }
-    }
-    return 0;
+    return control_mode;
 }
 
-void Motor_Controller::release_controller(int board_address)
+void Motor_Controller::set_ctrl_mode()
 {
-    pigpio_stop(board_address);
+    control_mode = {(control_mode + 1) % 2};
+
+    if (control_mode == 0)
+    {
+        std::cout << "Auto mode activated." << std::endl;
+    }
+    else
+    {
+        std::cout << "Manual mode activated." << std::endl;
+    }
+    
 }

@@ -1,10 +1,10 @@
 .vscode/
 /build
 /tests
-antenna_gui.py
 /user_interface/venv
+/user_interface/boot_interface/venv
 /user_interface/__pycache__
-/include/pigpio-master
+/motor_controls/include/pigpio-master
 /NOTES.md
 /boot_interface/components/__pycache__
 /boot_interface/venv
