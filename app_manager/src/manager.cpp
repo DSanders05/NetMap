@@ -1,7 +1,9 @@
 #include "../include/manager.hpp"
-#include "../../motor_controls/include/motor_controller.hpp"
 
-Manager::Manager() : motor_controller(), app_client() {}
+Manager::Manager()
+    : app_client(), motor_controller()
+{
+}
 
 Manager::~Manager() 
 {
@@ -13,11 +15,6 @@ Manager::~Manager()
 
 void Manager::start_auto_mode()
 {
-    if (motor_controller.get_ctrl_mode() != 0)
-    {
-        motor_controller.set_ctrl_mode();
-    }
-    
     /*
         Start at 0
         Scan clockwise until 360 degrees
@@ -27,12 +24,12 @@ void Manager::start_auto_mode()
         Repeat
     */
 
-   /*
-        In this scan_area function is where we will need to start a thread for a keyboard
-        listener so that we know when to swap between AUTO and MANUAL mode
-   */
+    // TODO - Listen for keyboard interrupt to change modes?
 
-   // TODO - Listen for keyboard interrupt to change modes?
+    if (motor_controller.get_ctrl_mode() != 0)
+    {
+        motor_controller.set_ctrl_mode();
+    }
 
     if (motor_controller.get_heading_init() == false)
         {
@@ -41,7 +38,7 @@ void Manager::start_auto_mode()
 
     bool scanning={true};
 
-    time_sleep(2); // 2 second pause
+    time_sleep(2);  // 2 second pause
 
     if (motor_controller.get_heading() != 0.0)
     {
@@ -59,6 +56,10 @@ void Manager::start_auto_mode()
             {
                 motor_controller.activate_motor();
                 motor_controller.set_heading(0.3f);
+                // if (i % 2 == 0)
+                // {
+                //     app_client.attempt_connection();
+                // }
             }
             
             std::cout << "Heading after CCW rotation: " << motor_controller.get_heading() << std::endl;
@@ -72,16 +73,19 @@ void Manager::start_auto_mode()
             {
                 motor_controller.activate_motor();
                 motor_controller.set_heading(-0.3f);
+                // if (i % 2 == 0)
+                // {
+                //     app_client.attempt_connection();
+                // }
             }
             
             std::cout << "Heading after CW rotation: " << motor_controller.get_heading() << std::endl;
         }
 
-        time_sleep(15);
+        time_sleep(10);
     }
     
     gpio_write(motor_controller.board_address,motor_controller.pulse_pin,PI_LOW);
-
 }
 
 void Manager::change_controller_mode()

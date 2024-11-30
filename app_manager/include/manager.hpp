@@ -1,10 +1,7 @@
 #ifndef MANAGER_HPP
 #define MANAGER_HPP
 
-#include <thread>
-#include <atomic>
 #include <iostream>
-#include <vector>
 #include <string>
 #include "../../communications/client/include/Client.hpp"
 #include "../../motor_controls/include/motor_controller.hpp"

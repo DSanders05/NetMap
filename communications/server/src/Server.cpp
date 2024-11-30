@@ -1,6 +1,6 @@
 #include "../include/Server.hpp"
 
-Server::Server(int port = NULL) 
+Server::Server(int port = {55555}) 
     : port(port),server_socket(-1),running(false) 
 {}
 
@@ -28,13 +28,6 @@ void Server::handle_client(int client_socket)
 
         std::string response;
         response = ("Message received: " + message);
-        // if (message == "AUTO")
-        // {
-        // }
-        // else
-        // {
-        //     perror("Message not received.");
-        // }
         
         send(client_socket,response.c_str(),response.size(),0);
         handling = {false};
