@@ -20,6 +20,10 @@ public:
     void start_auto_mode();
 
     void change_controller_mode();
+
+    void enter_target(int target);
+
+    void setup_zero();
 };
 
 #endif

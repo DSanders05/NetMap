@@ -33,6 +33,7 @@ void Manager::start_auto_mode()
 
     if (motor_controller.get_heading_init() == false)
         {
+            std::cout << "Entering heading initialization from start mode function." << std::endl;
             motor_controller.initialize_heading();
         }
 
@@ -47,15 +48,15 @@ void Manager::start_auto_mode()
 
     while (scanning)
     {
-        if (motor_controller.get_clockwise())
+        if (motor_controller.get_ctr_clockwise())
         {
-            motor_controller.set_clockwise(false);
-            gpio_write(motor_controller.board_address,motor_controller.direction_pin,motor_controller.get_clockwise());
+            motor_controller.set_ctr_clockwise(false);
+            gpio_write(motor_controller.board_address,motor_controller.direction_pin,motor_controller.get_ctr_clockwise());
 
             for (size_t i = 0; i < 1200; i++)
             {
                 motor_controller.activate_motor();
-                motor_controller.set_heading(0.3f);
+                motor_controller.set_heading(-0.3f);
                 // if (i % 2 == 0)
                 // {
                 //     app_client.attempt_connection();
@@ -66,13 +67,13 @@ void Manager::start_auto_mode()
         }
         else
         {
-            motor_controller.set_clockwise(true);
-            gpio_write(motor_controller.board_address,motor_controller.direction_pin,motor_controller.get_clockwise());
+            motor_controller.set_ctr_clockwise(true);
+            gpio_write(motor_controller.board_address,motor_controller.direction_pin,motor_controller.get_ctr_clockwise());
 
             for (size_t i = 0; i < 1200; i++)
             {
                 motor_controller.activate_motor();
-                motor_controller.set_heading(-0.3f);
+                motor_controller.set_heading(0.3f);
                 // if (i % 2 == 0)
                 // {
                 //     app_client.attempt_connection();
@@ -91,4 +92,16 @@ void Manager::start_auto_mode()
 void Manager::change_controller_mode()
 {
     motor_controller.set_ctrl_mode();
+}
+
+void Manager::enter_target(int target)
+{
+    motor_controller.set_ctr_clockwise(true);
+    motor_controller.rotate_to(target);
+    std::cout << "Turning to " << target << " degrees." << std::endl;
+}
+
+void Manager::setup_zero()
+{
+    motor_controller.initialize_heading();
 }
