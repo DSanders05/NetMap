@@ -146,9 +146,9 @@ void Motor_Controller::rotate_to(int int_target)
 
     // If we're rotating CW and going to target will take us below 0
     // Swap rotation
-    if (ctr_clockwise && (get_heading() - target) < 0)
+    if (!ctr_clockwise && (get_heading() - target) < 0)
     {
-        ctr_clockwise = {false};
+        ctr_clockwise = {true};
         gpio_write(board_address,direction_pin,ctr_clockwise);
         std::cout << "Approaching target counter-clockwise." << std::endl;
 
@@ -158,9 +158,8 @@ void Motor_Controller::rotate_to(int int_target)
             set_heading(0.3f);
         }
     }
-    else if (!ctr_clockwise && (get_heading() + target) > 360)
+    else if (!ctr_clockwise)
     {
-        ctr_clockwise = {true};
         gpio_write(board_address,direction_pin,ctr_clockwise);
         std::cout << "Approaching target clockwise." << std::endl;
 
@@ -168,6 +167,29 @@ void Motor_Controller::rotate_to(int int_target)
         {
             activate_motor();
             set_heading(-0.3f);
+        }
+    }
+    else if (ctr_clockwise && (get_heading() + target) > 360)
+    {
+        ctr_clockwise = {false};
+        gpio_write(board_address,direction_pin,ctr_clockwise);
+        std::cout << "Approaching target clockwise." << std::endl;
+
+        for (size_t i = 0; i <= difference; i++)
+        {
+            activate_motor();
+            set_heading(-0.3f);
+        }
+    }
+    else if (ctr_clockwise)
+    {
+        gpio_write(board_address,direction_pin,ctr_clockwise);
+        std::cout << "Approaching target counter clockwise." << std::endl;
+
+        for (size_t i = 0; i <= difference; i++)
+        {
+            activate_motor();
+            set_heading(0.3f);
         }
     }
 

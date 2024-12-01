@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <thread>
+#include <vector>
 
 class Client
 {
@@ -15,6 +16,7 @@ private:
     std::string server_ip;
     int server_port;
     bool connected;
+
 public:
     Client();
 
