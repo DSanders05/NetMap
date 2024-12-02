@@ -1,0 +1,11 @@
+.vscode/
+/build
+/tests
+/user_interface/venv
+/user_interface/boot_interface/venv
+/user_interface/__pycache__
+/motor_controls/include/pigpio-master
+/NOTES.md
+/boot_interface/components/__pycache__
+/boot_interface/venv
+/user_interface/ui_pages/src/__pycache__
