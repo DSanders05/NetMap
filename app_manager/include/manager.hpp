@@ -3,27 +3,26 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include "../../communications/client/include/Client.hpp"
 #include "../../motor_controls/include/motor_controller.hpp"
 
 class Manager
 {
 private:
-    Client app_client;
     Motor_Controller motor_controller;
+    std::vector<std::string> server_ips;
     
 public:
-    Manager();
+    Manager(const std::vector<std::string>& server_ips, int server_port);
 
     ~Manager();
 
     void start_auto_mode();
 
-    void change_controller_mode();
-
-    void enter_target(int target);
-
     void setup_zero();
+
+    // void enter_target(int target);
 };
 
 #endif

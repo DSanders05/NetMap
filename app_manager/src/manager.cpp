@@ -1,14 +1,13 @@
 #include "../include/manager.hpp"
 
-Manager::Manager()
-    : app_client(), motor_controller()
+Manager::Manager(const std::vector<std::string>& server_ips, int server_port)
+    :motor_controller(),server_ips(server_ips)
 {
 }
 
 Manager::~Manager() 
 {
     motor_controller.~Motor_Controller();
-    app_client.~Client();
 
     std::cout << "App manager has been deconstructed." << std::endl;
 }
@@ -57,10 +56,14 @@ void Manager::start_auto_mode()
             {
                 motor_controller.activate_motor();
                 motor_controller.set_heading(-0.3f);
-                // if (i % 2 == 0)
-                // {
-                //     app_client.attempt_connection();
-                // }
+                if (i % 4 == 0)
+                {
+                    for (const auto& ip : server_ips)
+                    {
+                        Client client(ip, 8080);
+                        std::string response = client.attempt_connection();
+                    }
+                }
             }
             
             std::cout << "Heading after CCW rotation: " << motor_controller.get_heading() << std::endl;
@@ -74,10 +77,14 @@ void Manager::start_auto_mode()
             {
                 motor_controller.activate_motor();
                 motor_controller.set_heading(0.3f);
-                // if (i % 2 == 0)
-                // {
-                //     app_client.attempt_connection();
-                // }
+                if (i % 4 == 0)
+                {
+                    for (const auto& ip : server_ips)
+                    {
+                        Client client(ip, 8080);
+                        std::string response = client.attempt_connection();
+                    }
+                }
             }
             
             std::cout << "Heading after CW rotation: " << motor_controller.get_heading() << std::endl;
@@ -87,18 +94,6 @@ void Manager::start_auto_mode()
     }
     
     gpio_write(motor_controller.board_address,motor_controller.pulse_pin,PI_LOW);
-}
-
-void Manager::change_controller_mode()
-{
-    motor_controller.set_ctrl_mode();
-}
-
-void Manager::enter_target(int target)
-{
-    motor_controller.set_ctr_clockwise(true);
-    motor_controller.rotate_to(target);
-    std::cout << "Turning to " << target << " degrees." << std::endl;
 }
 
 void Manager::setup_zero()

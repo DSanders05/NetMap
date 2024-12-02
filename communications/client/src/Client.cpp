@@ -1,90 +1,61 @@
 #include "../include/Client.hpp"
+#include <iostream>
+#include <cstring>
+#include <arpa/inet.h>
+#include <unistd.h>
 
-struct command
+
+Client::Client(const std::string& server_ip, int server_port)
+: server_ip(server_ip), server_port(server_port)  { }
+
+
+
+std::string  Client::attempt_connection() 
 {
-    std::string mode;
-    int target;
-};
-
-Client::Client()
-: server_ip(""), server_port(0), client_socket(-1),connected(false) 
-{
-}
-
-Client::~Client() 
-{
-    if (client_socket != -1)
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) 
     {
-        close(client_socket);
-    }
-}
-
-void Client::attempt_connection() 
-{
-    client_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (client_socket == -1)
-    {
-        perror("Socket creation failed.");
-    }
-    
-    sockaddr_in server_address{};
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(server_port);
-
-    if (inet_pton(AF_INET, server_ip.c_str(), &server_address.sin_addr) <= 0 )
-    {
-        perror("Invalid address");
+        return "Failed to create socket.";
     }
 
-    if (connect(client_socket,(sockaddr*)&server_address,sizeof(server_address)) == -1)
-    {
-        perror("Connection failed.");
-    }
-    
-    std::cout << "Connected to server at " << server_ip << ":" << server_port << std::endl;
-}
+    sockaddr_in server_addr{};
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(server_port);
 
-std::string Client::request_data() 
-{
-    if (client_socket == -1)
+    if (inet_pton(AF_INET, server_ip.c_str(), &server_addr.sin_addr) <= 0) 
     {
-        perror("ERROR: Not connected to server.");
-    }
-    
-    std::string command = "DATA REQ";
-    send(client_socket, command.c_str(), command.size(),0);
-
-    char buffer[1024];
-    std::memset(buffer,0,sizeof(buffer));
-    int bytes_received = recv(client_socket,buffer,sizeof(buffer)-1,0);
-
-    if (bytes_received <= 0)
-    {
-        perror("ERROR: Failed to receive response from server.");
+        close(sock);
+        return "Invalid server IP address.";
     }
 
-    return buffer;
-}
-
-std::string Client::send_command(const int& target, const std::string& mode)
-{
-    if (mode != "MANU")
+    if (connect(sock, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr)) < 0) 
     {
-        return "ERROR: Not in manual mode.";
+        close(sock);
+        return "Connection failed.";
     }
 
-    std::string command = std::to_string(target);
-
-    send(client_socket,command.c_str(),command.size(),0);
-    
-    char buffer[1024];
-    memset(buffer,0,sizeof(buffer));
-    int bytes_received = recv(client_socket,buffer,sizeof(buffer)-1,0);
-
-    if (bytes_received <=0)
+    const char* message = "REQUEST_SIGNAL_STRENGTH\n";
+    if (send(sock, message, strlen(message), 0) < 0) 
     {
-        return "ERROR: Failed to received response from server.";
+        close(sock);
+        return "Send failed.";
     }
-    
-    return buffer;
+
+    char buffer[128] = {0};
+    ssize_t len = recv(sock, buffer, sizeof(buffer) - 1, 0);
+
+    close(sock);
+
+    if (len > 0) 
+    {
+        return std::string(buffer, len);
+    }
+     else if (len == 0) 
+    {
+        return "Server closed the connection.";
+    }
+    else 
+    {
+        return "Receive failed.";
+    }
 }

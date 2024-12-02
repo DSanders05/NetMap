@@ -1,22 +1,20 @@
+// #include <pybind11/pybind11.h>
 #include "app_manager/include/manager.hpp"
+
 
 int main(int argc, char* argv[])
 {
-    int target = {};
-    Manager net_map = Manager();
+    std::vector<std::string> rover_ips = {
+        "192.168.2.22",
+        "192.168.2.33",
+        "192.168.2.44",
+        "192.168.2.55"
+    };
+
+    Manager net_map = Manager(rover_ips, 8080);
 
     net_map.setup_zero();
-
-    // net_map.start_auto_mode();
-    net_map.change_controller_mode();
-    std::cout << "Enter a heading to turn to: " << std::endl;
-    std::cin >> target;
-
-    net_map.enter_target(target);
-
-    std::cout << "Enter the next heading to turn to: " << std::endl;
-    std::cin >> target;
-
-    net_map.enter_target(target);
+    net_map.start_auto_mode();
+    
     return 0;
 }

@@ -1,4 +1,0 @@
-Package Version
-------- -------
-pip     24.0
-Python 3.12.3

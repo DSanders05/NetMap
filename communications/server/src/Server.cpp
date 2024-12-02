@@ -1,100 +1,65 @@
 #include "../include/Server.hpp"
+#include <iostream>
+#include <cstring>
+#include <netinet/in.h>
+#include <unistd.h>
 
-Server::Server(int port = {55555}) 
-    : port(port),server_socket(-1),running(false) 
-{}
+Server::Server(int port) : server_port(port) {}
 
-Server::~Server() {
-    Server::stop_server();
-}
-
-void Server::handle_client(int client_socket)
-{
-    bool handling = {true};
-    char buffer[1024];
-    while (handling)
+void Server::start() {
+    int server_sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_sock < 0) 
     {
-        memset(buffer,0,sizeof(buffer));
-        int bytes_received = recv(client_socket,buffer,sizeof(buffer)-1,0);
-
-        if (bytes_received <= 0)
-        {
-            std::cout << "Client not connected." << std::endl;
-            break;
-        }
-        
-        std::string message(buffer);
-        std::cout << "Received message: " << message << std::endl;
-
-        std::string response;
-        response = ("Message received: " + message);
-        
-        send(client_socket,response.c_str(),response.size(),0);
-        handling = {false};
-
-    }
-
-    close(client_socket);
-}
-
-void Server::start_server() 
-{
-    server_socket = socket(AF_INET, SOCK_STREAM,0);
-    if (server_socket == -1)
-    {
-        perror("Socket creation failed.");
-        return;
-    }
-    
-    sockaddr_in server_address={};
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(port);
-    server_address.sin_addr.s_addr = INADDR_ANY;
-
-    if (bind(server_socket, (sockaddr*)&server_address,sizeof(server_address)) == -1)
-    {
-        perror("Server socket binding failed.");
+        std::cerr << "Failed to create socket.\n";
         return;
     }
 
-    if (listen(server_socket,5)==-1)
+    sockaddr_in server_addr{};
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(server_port);
+
+    if (bind(server_sock, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr)) < 0) 
     {
-        perror("Socket failed to listening for incoming connections.");
+        std::cerr << "Binding failed.\n";
+        close(server_sock);
         return;
     }
-    
-    running = true;
 
-    std::cout << "Server listening on port: " << port << std::endl;
-
-    while (running)
+    if (listen(server_sock, 5) < 0) 
     {
-        sockaddr_in client_address = {};
-        socklen_t client_len = sizeof(client_address);
-        int client_socket = accept(server_socket, (sockaddr*)&client_address,&client_len);
-        if (client_socket == -1)
-        {
-            if (running)
-            {
-                perror("Accept failed.");
-            }
+        std::cerr << "Listening failed.\n";
+        close(server_sock);
+        return;
+    }
+
+    std::cout << "Server is running...\n";
+
+    while (true) 
+    {
+        sockaddr_in client_addr{};
+        socklen_t client_len = sizeof(client_addr);
+        int client_sock = accept(server_sock, reinterpret_cast<sockaddr*>(&client_addr), &client_len);
+
+        if (client_sock < 0) {
+            std::cerr << "Failed to accept connection.\n";
             continue;
         }
 
-        std::cout << "Client connected." << std::endl;
-        client_threads.emplace_back(&Server::handle_client,this,client_socket);
-    }
-}
+        char buffer[128] = {0};
+        ssize_t len = recv(client_sock, buffer, sizeof(buffer) - 1, 0);
 
-void Server::stop_server()
-{
-    running = false;
-    close(server_socket);
-    for (auto& thread : client_threads)
-    {
-        if (thread.joinable())
-        {
-            thread.join();
+        if (len > 0 && std::string(buffer, len) == "REQUEST_SIGNAL_STRENGTH\n") {
+            std::string response = "Signal Strength: 75%\n";
+            send(client_sock, response.c_str(), response.size(), 0);
+        } else if (len == 0) {
+            std::cerr << "Client disconnected gracefully.\n";
+        } else {
+            std::cerr << "Receive error occurred.\n";
         }
+
+        close(client_sock);
     }
+
+    close(server_sock);
 }
