@@ -1,0 +1,12 @@
+[Unit]
+Description=Runs the NetMap Executable on Startup
+After=network.target
+
+[Service]
+WorkingDirectory=~/NetMap/build
+ExecStart=~/NetMap/build/net_map
+Restart=always
+User=ncpa
+
+[Install]
+WantedBy=multi-user.target

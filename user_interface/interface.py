@@ -1,5 +1,13 @@
+import sys
+import os
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+
+sys.path.append("../build/app_manager/python_bindings")
+
+import manager_bindings
+
+manager = manager_bindings.Manager()
 
 class NetMapApp(ttk.Window):
     def __init__(self):
@@ -23,8 +31,8 @@ class NetMapApp(ttk.Window):
         frame = self.frames[page_name]
         frame.tkraise()
 
-    def submit_target(self):
-        print(f"Target submitted: {self.target_value.get()}")
+    # def submit_target(self):
+    #     print(f"Target submitted: {self.target_value.get()}")
 
 
 class InitPage(ttk.Frame):
@@ -32,33 +40,35 @@ class InitPage(ttk.Frame):
         super().__init__(parent)
 
         # Banner
-        banner = ttk.Label(self, text="NetMap", font=("Arial", 24, "bold"), anchor="center")
+        banner = ttk.Label(self, text="NetMap", font=("Arial", 30, "bold"), anchor="center")
         banner.pack(pady=20)
 
-        # Placeholder for image
-        image_frame = ttk.Frame(self)
-        image_frame.pack(pady=20)
-        image_label = ttk.Label(image_frame, text="[Image Placeholder]", anchor="center", relief="solid")
-        image_label.pack(padx=10, pady=10, ipadx=100, ipady=50)
+        # # Image frame 
+        # image_frame = ttk.Frame(self)
+        # image_frame.pack(pady=20)
+        # image_label = ttk.Label(image_frame, text="[Image Placeholder]", anchor="center", relief="solid")
+        # image_label.pack(padx=10, pady=10, ipadx=100, ipady=50)
 
         # Start button
-        start_button = ttk.Button(self, text="Start", command=lambda: parent.show_frame("AutoModePage"))
+        start_button = ttk.Button(self, text="Start", command=lambda:{manager.start_auto_mode }) #lambda: parent.show_frame("AutoModePage")
         start_button.pack(pady=20)
+
+
 
 
 class AutoModePage(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
 
-        # Banner
-        banner = ttk.Label(self, text="AUTO MODE", font=("Arial", 24, "bold"), anchor="center")
+        # Auto Scan Banner
+        banner = ttk.Label(self, text="AUTO SCAN", font=("Arial", 30, "bold"), anchor="center")
         banner.pack(pady=20)
 
         # Columns layout
         content_frame = ttk.Frame(self)
         content_frame.pack(expand=True, fill=BOTH, padx=20, pady=20)
 
-        # Left column (List of Rovers)
+        # Left column List of Rovers
         rovers_frame = ttk.Labelframe(content_frame, text="Rovers")
         rovers_frame.pack(side=LEFT, fill=BOTH, expand=True, padx=10)
 
@@ -73,11 +83,9 @@ class AutoModePage(ttk.Frame):
             ("Rover 1", "01", "100"),
             ("Rover 2", "02", "270"),
         ]
+        
         for entry in sample_data:
             self.rovers_table.insert("", END, values=entry)
-
-    def dummy_action(self):
-        print("Option button clicked.")
 
 
 if __name__ == "__main__":

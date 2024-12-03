@@ -9,14 +9,16 @@ Server::Server(int port) : server_port(port) {}
 
 void Server::start() {
     int server_sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_sock < 0) {
+    if (server_sock < 0) 
+    {
         std::cerr << "Failed to create socket: " << strerror(errno) << "\n";
         return;
     }
 
     // Enable SO_REUSEADDR to avoid "address already in use" errors
     int opt = 1;
-    if (setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+    if (setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) 
+    {
         std::cerr << "Failed to set socket options: " << strerror(errno) << "\n";
         close(server_sock);
         return;
@@ -27,13 +29,15 @@ void Server::start() {
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(server_port);
 
-    if (bind(server_sock, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr)) < 0) {
+    if (bind(server_sock, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr)) < 0) 
+    {
         std::cerr << "Binding failed: " << strerror(errno) << "\n";
         close(server_sock);
         return;
     }
 
-    if (listen(server_sock, 5) < 0) {
+    if (listen(server_sock, 5) < 0) 
+    {
         std::cerr << "Listening failed: " << strerror(errno) << "\n";
         close(server_sock);
         return;
@@ -41,7 +45,8 @@ void Server::start() {
 
     std::cout << "Server is running on port " << server_port << "...\n";
 
-    while (true) {
+    while (true) 
+    {
         sockaddr_in client_addr{};
         socklen_t client_len = sizeof(client_addr);
         int client_sock = accept(server_sock, reinterpret_cast<sockaddr*>(&client_addr), &client_len);
