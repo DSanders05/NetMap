@@ -60,7 +60,7 @@ std::string Client::attempt_connection() {
 
     if (len > 0) 
     {
-        return "Response from " + server_ip + ": " + std::string(buffer, len) +"\n";
+        return std::string(buffer, len) +"\n";
     } 
     else if (len == 0) 
     {

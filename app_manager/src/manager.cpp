@@ -38,12 +38,15 @@ void Manager::start_auto_mode()
                     std::vector<std::thread> threads;
 
                     for (const auto& ip : server_ips) {
-                        threads.emplace_back([ip]() {
+                        threads.emplace_back([this, ip]() {
                             Client client(ip, 8080);
                             std::string response = client.attempt_connection();
-                            std::cout << "Response from " << ip << ": " << response << std::endl;
+                            if (!response.empty()) {
+                                update_rovers(response);
+                             }
                         });
                     }
+
 
                     // Join threads after polling all IPs
                     for (auto& thread : threads) {
@@ -65,12 +68,15 @@ void Manager::start_auto_mode()
                     std::vector<std::thread> threads;
 
                     for (const auto& ip : server_ips) {
-                        threads.emplace_back([ip]() {
+                        threads.emplace_back([this, ip]() {
                             Client client(ip, 8080);
                             std::string response = client.attempt_connection();
-                            std::cout << "Response from " << ip << ": " << response << std::endl;
+                            if (!response.empty()) {
+                                update_rovers(response);
+                            }
                         });
                     }
+
 
                     for (auto& thread : threads) {
                         thread.join();
@@ -91,4 +97,22 @@ void Manager::start_auto_mode()
 void Manager::setup_zero()
 {
     motor_controller.initialize_heading();
+}
+
+void Manager::update_rovers(const std::string& signal_strength)
+{
+    double current_heading = motor_controller.get_heading();
+
+    if (current_heading < 0)
+    {
+        std::cerr << "Error: Heading not initialized." << std::endl;
+        return;
+    }
+
+    rovers.emplace_back(signal_strength,current_heading);
+}
+
+std::vector<std::pair<std::string,double>> Manager::get_rovers() const 
+{
+    return rovers;
 }

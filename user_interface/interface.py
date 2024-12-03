@@ -2,12 +2,11 @@ import sys
 import os
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-
-sys.path.append("../build/app_manager/python_bindings")
+sys.path.append("/home/ech024/NetMap/build/bindings")
 
 import manager_bindings
 
-manager = manager_bindings.Manager()
+manager = manager_bindings.Manager(["192.168.2.22"],8080)
 
 class NetMapApp(ttk.Window):
     def __init__(self):
@@ -49,10 +48,12 @@ class InitPage(ttk.Frame):
 
     def start_scan(self,parent):
         parent.show_frame("AutoModePage")
-        # try:
-        #     manager.start_auto_mode() # Call C++ function to start the auto mode scan
-        # except Exception as e:
-        #     print(f"Error in start_auto_mode function: {e}")
+        try:
+            manager.start_auto_mode()
+
+            parent.frames["AutoModePage"].refresh_rovers()
+        except Exception as e:
+            print(f"Error in start_auto_mode function: {e}")
 
 
 class AutoModePage(ttk.Frame):
@@ -77,14 +78,19 @@ class AutoModePage(ttk.Frame):
             self.rovers_table.heading(col, text=col.capitalize())
         self.rovers_table.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-        # Example data
-        sample_data = [
-            ("Rover 1", "01", "100"),
-            ("Rover 2", "02", "270"),
-        ]
-        
-        for entry in sample_data:
-            self.rovers_table.insert("", END, values=entry)
+    def refresh_rovers(self):
+        try:
+            rovers = manager.get_rovers()
+            # Clear existing rows
+            for item in self.rovers_table.get_children():
+                self.rovers_table.delete(item)
+            
+            # Populate with new data
+            for idx, (signal, heading) in enumerate(rovers, start=1):
+                self.rovers_table.insert("", "end", values=(f"Rover {idx}", heading, signal))
+        except Exception as e:
+            print(f"Error refreshing rover data: {e}")
+
 
 def start_ui():
     app = NetMapApp()

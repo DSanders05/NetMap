@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <utility>
 #include "../../communications/client/include/Client.hpp"
 #include "../../motor_controls/include/motor_controller.hpp"
 
@@ -13,6 +14,7 @@ private:
     Motor_Controller motor_controller;
     std::vector<std::string> server_ips;
     
+    std::vector<std::pair<std::string, double>> rovers;
 public:
     Manager(const std::vector<std::string>& server_ips, int server_port);
 
@@ -22,7 +24,9 @@ public:
 
     void setup_zero();
 
-    // void enter_target(int target);
+    void update_rovers(const std::string& signal_strength);
+
+    std::vector<std::pair<std::string,double>> get_rovers() const;
 };
 
 #endif

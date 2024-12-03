@@ -9,6 +9,7 @@ private:
  public:
     Server(int port);
     void start();
+    std::string get_sig_str();
 };
 
 #endif

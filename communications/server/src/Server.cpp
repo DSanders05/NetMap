@@ -4,8 +4,36 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <errno.h>
+#include <cstdlib>
+#include <sstream>
+#include <fstream>
 
 Server::Server(int port) : server_port(port) {}
+
+std::string Server::get_sig_str() {
+    // Adjust this command or implementation to fit your system environment
+    const std::string command = "iwconfig wlan0 | grep -i signal | awk '{print $4}' | cut -d'=' -f2";
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe) {
+        return "Error: Unable to fetch signal strength\n";
+    }
+
+    char buffer[128];
+    std::string result;
+    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+        result += buffer;
+    }
+    pclose(pipe);
+
+    // Clean up result and add a percentage sign
+    std::stringstream ss(result);
+    std::string signal_strength;
+    ss >> signal_strength;
+    if (signal_strength.empty()) {
+        return "Error: No signal strength detected\n";
+    }
+    return "Signal Strength: " + signal_strength + "%\n";
+}
 
 void Server::start() {
     int server_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -64,13 +92,13 @@ void Server::start() {
             std::cout << "Received request: " << request;
 
             if (request == "REQUEST_SIGNAL_STRENGTH\n") {
-                std::string response = "Signal Strength: 75%\n";
+                std::string response = get_sig_str();
                 send(client_sock, response.c_str(), response.size(), 0);
             } else {
                 std::cerr << "Invalid request received: " << request << "\n";
             }
         } else if (len == 0) {
-            std::cerr << "Client disconnected gracefully.\n";
+            std::cerr << "Client disconnected.\n";
         } else {
             std::cerr << "Receive error: " << strerror(errno) << "\n";
         }
