@@ -5,20 +5,17 @@ from ttkbootstrap.constants import *
 
 sys.path.append("../build/app_manager/python_bindings")
 
-# import manager_bindings
+import manager_bindings
 
-# manager = manager_bindings.Manager()
+manager = manager_bindings.Manager()
 
 class NetMapApp(ttk.Window):
     def __init__(self):
         super().__init__(title="NetMap Monitoring Tool", size=(800, 400), themename="superhero")
 
         self.frames = {}
-        # self.selected_rover = ttk.StringVar(value="None")
-        # self.connection_status = ttk.StringVar(value="Not Connected")
-        # self.target_value = ttk.StringVar()
 
-        # Create pages
+        # Create page frames
         for PageClass in (InitPage, AutoModePage):
             page = PageClass(self)
             self.frames[PageClass.__name__] = page
@@ -30,10 +27,7 @@ class NetMapApp(ttk.Window):
     def show_frame(self, page_name):
         frame = self.frames[page_name]
         frame.tkraise()
-
-    # def submit_target(self):
-    #     print(f"Target submitted: {self.target_value.get()}")
-
+        
 
 class InitPage(ttk.Frame):
     def __init__(self, parent):
@@ -50,10 +44,15 @@ class InitPage(ttk.Frame):
         # image_label.pack(padx=10, pady=10, ipadx=100, ipady=50)
 
         # Start button
-        start_button = ttk.Button(self, text="Start", command=lambda:{print("Scan button pressed")}) #lambda: parent.show_frame("AutoModePage") manager.start_auto_mode()
+        start_button = ttk.Button(self, text="Start Auto Scan", command=lambda: self.start_scan(parent))
         start_button.pack(pady=(60,0))
 
-
+    def start_scan(self,parent):
+        parent.show_frame("AutoModePage")
+        # try:
+        #     manager.start_auto_mode() # Call C++ function to start the auto mode scan
+        # except Exception as e:
+        #     print(f"Error in start_auto_mode function: {e}")
 
 
 class AutoModePage(ttk.Frame):

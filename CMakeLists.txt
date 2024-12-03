@@ -23,10 +23,11 @@ message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 
 
 # Subdirectories
+add_subdirectory(motor_controls)
 add_subdirectory(app_manager)
 add_subdirectory(communications/client)
 add_subdirectory(communications/server)
-add_subdirectory(motor_controls)
+add_subdirectory(bindings)
 
 # Main Executable
 add_executable(net_map ./main.cpp)
