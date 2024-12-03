@@ -5,18 +5,18 @@ from ttkbootstrap.constants import *
 
 sys.path.append("../build/app_manager/python_bindings")
 
-import manager_bindings
+# import manager_bindings
 
-manager = manager_bindings.Manager()
+# manager = manager_bindings.Manager()
 
 class NetMapApp(ttk.Window):
     def __init__(self):
-        super().__init__(title="NetMap UI", size=(800, 400), themename="superhero")
+        super().__init__(title="NetMap Monitoring Tool", size=(800, 400), themename="superhero")
 
         self.frames = {}
-        self.selected_rover = ttk.StringVar(value="None")
-        self.connection_status = ttk.StringVar(value="Not Connected")
-        self.target_value = ttk.StringVar()
+        # self.selected_rover = ttk.StringVar(value="None")
+        # self.connection_status = ttk.StringVar(value="Not Connected")
+        # self.target_value = ttk.StringVar()
 
         # Create pages
         for PageClass in (InitPage, AutoModePage):
@@ -40,8 +40,8 @@ class InitPage(ttk.Frame):
         super().__init__(parent)
 
         # Banner
-        banner = ttk.Label(self, text="NetMap", font=("Arial", 30, "bold"), anchor="center")
-        banner.pack(pady=20)
+        banner = ttk.Label(self, text="NetMap", font=("Arial", 40, "bold"), anchor="center")
+        banner.pack(pady=(100, 10))
 
         # # Image frame 
         # image_frame = ttk.Frame(self)
@@ -50,8 +50,8 @@ class InitPage(ttk.Frame):
         # image_label.pack(padx=10, pady=10, ipadx=100, ipady=50)
 
         # Start button
-        start_button = ttk.Button(self, text="Start", command=lambda:{manager.start_auto_mode }) #lambda: parent.show_frame("AutoModePage")
-        start_button.pack(pady=20)
+        start_button = ttk.Button(self, text="Start", command=lambda:{print("Scan button pressed")}) #lambda: parent.show_frame("AutoModePage") manager.start_auto_mode()
+        start_button.pack(pady=(60,0))
 
 
 
@@ -87,7 +87,9 @@ class AutoModePage(ttk.Frame):
         for entry in sample_data:
             self.rovers_table.insert("", END, values=entry)
 
-
-if __name__ == "__main__":
+def start_ui():
     app = NetMapApp()
     app.mainloop()
+
+if __name__ == "__main__":
+    start_ui()
