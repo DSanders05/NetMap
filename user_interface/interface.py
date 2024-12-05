@@ -32,6 +32,16 @@ class NetMapApp(ttk.Window):
             print("PageClass.__name__ : ", PageClass.__name__)
             page.place(relwidth=1, relheight=1)
 
+# Start button for AUTO Mode
+        start_button = ttk.Button(frames["InitPage"], text="Start Auto Scan", command=lambda: self.start_scan())
+        start_button.pack(pady=(60,0))
+
+        connect_button = ttk.Button(frames["AutoModePage"].option_frame, text="Connect", command=lambda: (self.show_frame("ManualPage"),self.stop_motor()))
+        connect_button.pack(fill=X,pady=100)
+
+        return_button = ttk.Button(frames["ManualPage"].button_frame,text="Return to Auto Mode",command=lambda:{self.show_frame("AutoModePage")})
+        return_button.pack(anchor=CENTER,pady=100)
+
         # Show the initialization page
         print("Showing first page with show_frame")
         self.show_frame("InitPage")
@@ -43,6 +53,12 @@ class NetMapApp(ttk.Window):
         self.frame = frames[page_name]
         self.frame.tkraise()
         print(f"Called frame.tkraise({page_name}) in show_frame",self.frame)
+
+    def start_scan(self):
+        print("About to show_frame AutoModePage")
+        self.show_frame("AutoModePage")
+        print("About to start_motor")
+        self.start_motor()
 
     # Starts thread to run the motor in to keep from blocking interface
     def start_motor(self):
@@ -74,17 +90,6 @@ class InitPage(ttk.Frame):
         banner = ttk.Label(self, text="NetMap", font=("Arial", 40, "bold"), anchor="center")
         banner.pack(pady=(100, 10))
 
-        # Start button for AUTO Mode
-        start_button = ttk.Button(self, text="Start Auto Scan", command=lambda: self.start_scan(parent))
-        start_button.pack(pady=(60,0))
-
-    def start_scan(self,parent):
-        print("About to show_frame AutoModePage")
-        parent.show_frame("AutoModePage")
-        print("About to start_motor")
-        parent.start_motor()
-
-
 class AutoModePage(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -108,11 +113,10 @@ class AutoModePage(ttk.Frame):
         self.rovers_table.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
         # Connect button Frame
-        option_frame = ttk.Frame(content_frame)
-        option_frame.pack(side=RIGHT,expand=True,fill=BOTH)
+        self.option_frame = ttk.Frame(content_frame)
+        self.option_frame.pack(side=RIGHT,expand=True,fill=BOTH)
 
-        connect_button = ttk.Button(option_frame, text="Connect", command=lambda: (parent.show_frame("ManualPage"),parent.stop_motor()))
-        connect_button.pack(fill=X,pady=100)
+
 
 
 class ManualPage(ttk.Frame):
@@ -141,11 +145,9 @@ class ManualPage(ttk.Frame):
         loc_value = ttk.Label(connection_frame,text="56")
         loc_value.grid(row=2,column=2,pady=(50,0),padx=(50,0))
 
-        button_frame = ttk.Frame(content_frame)
-        button_frame.pack(side=RIGHT,fill=BOTH,expand=True,padx=10)
+        self.button_frame = ttk.Frame(content_frame)
+        self.button_frame.pack(side=RIGHT,fill=BOTH,expand=True,padx=10)
 
-        return_button = ttk.Button(button_frame,text="Return to Auto Mode",command=lambda:{parent.show_frame("AutoModePage")})
-        return_button.pack(anchor=CENTER,pady=100)
 
 def start_ui():
     app = NetMapApp()
