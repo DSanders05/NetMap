@@ -12,19 +12,23 @@ import manager_bindings
 # Creates a Manager instance for C++ functions
 manager = manager_bindings.Manager(["192.168.2.22"],8080)
 
+frames = {}
+
 class NetMapApp(ttk.Window):
     def __init__(self):
         super().__init__(title="NetMap Monitoring Tool", size=(800, 400), themename="superhero")
 
         # Vars for page frame list, motor thread, and thread running flag (bool)
-        self.frames = {}
+        # self.frames = {}
+        self.frame
         self.motor_thread = None
         self.motor_running = threading.Event()
 
         # Create page frames
         for PageClass in (InitPage, AutoModePage, ManualPage):
             page = PageClass(self)
-            self.frames[PageClass.__name__] = page
+            # self.frames[PageClass.__name__] = page
+            frames[PageClass.__name__] = page
             print("PageClass.__name__ : ", PageClass.__name__)
             page.place(relwidth=1, relheight=1)
 
@@ -35,9 +39,10 @@ class NetMapApp(ttk.Window):
     # Swaps page frames
     def show_frame(self, page_name):
         print("In show_frame")
-        frame = self.frames[page_name]
-        frame.tkraise()
-        print(f"Called frame.tkraise({page_name}) in show_frame",frame)
+        # frame = self.frames[page_name]
+        self.frame = frames[page_name]
+        self.frame.tkraise()
+        print(f"Called frame.tkraise({page_name}) in show_frame",self.frame)
 
     # Starts thread to run the motor in to keep from blocking interface
     def start_motor(self):
