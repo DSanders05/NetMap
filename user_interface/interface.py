@@ -28,6 +28,7 @@ class NetMapApp(ttk.Window):
             page.place(relwidth=1, relheight=1)
 
         # Show the initialization page
+        print("Showing first page with show_frame")
         self.show_frame("InitPage")
 
     # Swaps page frames
