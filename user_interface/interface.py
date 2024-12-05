@@ -1,18 +1,25 @@
+from concurrent.futures import thread
 import sys
 import os
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+import threading
 sys.path.append("/home/ech0/NetMap/build/bindings")
 
+# Imports pybind bindings
 import manager_bindings
 
+# Creates a Manager instance for C++ functions
 manager = manager_bindings.Manager(["192.168.2.22"],8080)
 
 class NetMapApp(ttk.Window):
     def __init__(self):
         super().__init__(title="NetMap Monitoring Tool", size=(800, 400), themename="superhero")
 
+        # Vars for page frame list, motor thread, and thread running flag (bool)
         self.frames = {}
+        self.motor_thread = None
+        self.motor_running = threading.Event()
 
         # Create page frames
         for PageClass in (InitPage, AutoModePage, ManualPage):
@@ -23,10 +30,32 @@ class NetMapApp(ttk.Window):
         # Show the initialization page
         self.show_frame("InitPage")
 
+    # Swaps page frames
     def show_frame(self, page_name):
         frame = self.frames[page_name]
         frame.tkraise()
-        
+
+    # Starts thread to run the motor in to keep from blocking interface
+    def start_motor(self):
+        if not self.motor_thread or not self.motor_thread.is_alive():
+            self.motor_running.set()
+            self.motor_thread = threading.Thread(target=self.run_motor)
+            self.motor_thread.start()
+
+    # Start Manager objects auto_mode
+    def run_motor(self):
+        try:
+            manager.start_auto_mode()
+        except Exception as e:
+            print(f"Error starting auto mode: {e}")
+
+    # Exits the Managers auto_mode loop
+    def stop_motor(self):
+        """Stop stepper motor"""
+        if self.motor_thread and self.motor_thread.is_alive():
+            self.motor_running.clear()
+            manager.stop_auto_mode()
+            self.motor_thread.join()
 
 class InitPage(ttk.Frame):
     def __init__(self, parent):
@@ -36,24 +65,13 @@ class InitPage(ttk.Frame):
         banner = ttk.Label(self, text="NetMap", font=("Arial", 40, "bold"), anchor="center")
         banner.pack(pady=(100, 10))
 
-        # # Image frame 
-        # image_frame = ttk.Frame(self)
-        # image_frame.pack(pady=20)
-        # image_label = ttk.Label(image_frame, text="[Image Placeholder]", anchor="center", relief="solid")
-        # image_label.pack(padx=10, pady=10, ipadx=100, ipady=50)
-
-        # Start button
+        # Start button for AUTO Mode
         start_button = ttk.Button(self, text="Start Auto Scan", command=lambda: self.start_scan(parent))
         start_button.pack(pady=(60,0))
 
     def start_scan(self,parent):
         parent.show_frame("AutoModePage")
-        try:
-            manager.start_auto_mode()
-
-            parent.frames["AutoModePage"].refresh_rovers()
-        except Exception as e:
-            print(f"Error in start_auto_mode function: {e}")
+        parent.start_motor()
 
 
 class AutoModePage(ttk.Frame):
@@ -78,25 +96,12 @@ class AutoModePage(ttk.Frame):
             self.rovers_table.heading(col, text=col.capitalize())
         self.rovers_table.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-        # Option Frame
+        # Connect button Frame
         option_frame = ttk.Frame(content_frame)
         option_frame.pack(side=RIGHT,expand=True,fill=BOTH)
 
-        start_button = ttk.Button(option_frame, text="Connect", command=lambda: parent.show_frame("ManualPage"))
-        start_button.pack(fill=X,pady=100)
-
-    # def refresh_rovers(self):
-    #     try:
-    #         rovers = manager.get_rovers()
-    #         # Clear existing rows
-    #         for item in self.rovers_table.get_children():
-    #             self.rovers_table.delete(item)
-            
-    #         # Populate with new data
-    #         for idx, (signal, heading) in enumerate(rovers, start=1):
-    #             self.rovers_table.insert("", "end", values=(f"Rover {idx}", heading, signal))
-    #     except Exception as e:
-    #         print(f"Error refreshing rover data: {e}")
+        connect_button = ttk.Button(option_frame, text="Connect", command=lambda: (parent.show_frame("ManualPage"),parent.stop_motor()))
+        connect_button.pack(fill=X,pady=100)
 
 
 class ManualPage(ttk.Frame):
@@ -128,7 +133,7 @@ class ManualPage(ttk.Frame):
         button_frame = ttk.Frame(content_frame)
         button_frame.pack(side=RIGHT,fill=BOTH,expand=True,padx=10)
 
-        return_button = ttk.Button(button_frame,text="Return to Auto Scan",command=lambda:{parent.show_frame("AutoModePage")})
+        return_button = ttk.Button(button_frame,text="Return to Auto Mode",command=lambda:{parent.show_frame("AutoModePage")})
         return_button.pack(anchor=CENTER,pady=100)
 
 def start_ui():

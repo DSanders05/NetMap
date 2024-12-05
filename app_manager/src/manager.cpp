@@ -1,11 +1,13 @@
 #include "../include/manager.hpp"
 #include <thread>
 
+// Manager Constructor
 Manager::Manager(std::vector<char*> server_ips, int server_port)
     :motor_controller(),server_ips(server_ips)
 {
 }
 
+// Manager Deconstructor (also deconstructs the RPi motor controller)
 Manager::~Manager() 
 {
     motor_controller.~Motor_Controller();
@@ -13,31 +15,44 @@ Manager::~Manager()
     std::cout << "App manager has been deconstructed." << std::endl;
 }
 
+// Auto Mode Logic
 void Manager::start_auto_mode()
 {
+    // First time entering auto mode will init heading
+    // After that this will be bypassed
     if (!motor_controller.get_heading_init()) {
         std::cout << "Initializing heading..." << std::endl;
         motor_controller.initialize_heading();
     }
 
-    bool scanning = true;
+    // If we're re-entering from manual mode go back to "0" before continuing
+    // Going back to "0" just lets us ignore our heading when re-entering and gives a 
+    // common starting point for code below.
+    motor_controller.return_to_zero();
 
-    time_sleep(2);  // Initial pause
+    // Flag to exit loop when we change modes
+    motor_running = {true};
 
-    std::cout << "Starting scan..." << std::endl;
-    while (scanning) {
+    while (motor_running) {
+        //  Always enter this loop with heading = 0 and CCW flag set to false
         if (motor_controller.get_ctr_clockwise()) {
             motor_controller.set_ctr_clockwise(false);
             gpio_write(motor_controller.board_address, motor_controller.direction_pin, motor_controller.get_ctr_clockwise());
 
+            // Make a full rotation (1200 steps)
+            // This loop is for CW rotation so we subtract 0.3 for each step
             for (size_t i = 0; i < 1200; i++) {
                 motor_controller.activate_motor();
                 motor_controller.set_heading(-0.3f);
 
+                // After every 15 degrees attempt to connect to ground vehicles
                 if (i % 50 == 0) { 
                         for(auto ip : server_ips){
-                            Client client(ip);
-                            client.attempt_connection(ip);
+                            Client client(ip,8080);
+                            if(client.attempt_connection() == 1)
+                            {
+                                std::cout << "Successfully connected to " << ip << std::endl;
+                            }
                         }
                     // Poll servers every 4 motor activations
                     // std::vector<std::thread> threads;
@@ -59,20 +74,26 @@ void Manager::start_auto_mode()
                     // }
                 }
             }
-
-            std::cout << "Heading after CCW rotation: " << motor_controller.get_heading() << std::endl;
         } else {
+            // Swap rotation direction and repeat steps from above
             motor_controller.set_ctr_clockwise(true);
             gpio_write(motor_controller.board_address, motor_controller.direction_pin, motor_controller.get_ctr_clockwise());
 
+            // Another 1200 steps for full rotation
             for (size_t i = 0; i < 1200; i++) {
                 motor_controller.activate_motor();
+
+                // This loop is for CCW rotation so we add 0.3 until 360 degrees
                 motor_controller.set_heading(0.3f);
 
+                // After every 15 degrees we try to connect to ground vehicles
                 if (i % 50 == 0) {
                     for(auto ip : server_ips){
-                        Client client(ip);
-                        client.attempt_connection(ip);
+                        Client client(ip,8080);
+                       if(client.attempt_connection() == 1)
+                       {
+                            std::cout << "Successfully connected to " << ip << std::endl;
+                       }
                     };
                 //     std::vector<std::thread> threads;
 
@@ -92,13 +113,11 @@ void Manager::start_auto_mode()
                 //     }
                 }
             }
-
-            std::cout << "Heading after CW rotation: " << motor_controller.get_heading() << std::endl;
         }
-
-        time_sleep(10);  // Pause between scans
+        time_sleep(30);  // Pause between scans (seconds)
     }
 
+    // After exiting while loop make sure the motor pulse pin is set low
     gpio_write(motor_controller.board_address, motor_controller.pulse_pin, PI_LOW);
 }
 
@@ -121,11 +140,13 @@ void Manager::update_rovers(const std::string& signal_strength)
     rovers.emplace_back(signal_strength,current_heading);
 }
 
+// Manual mode function to turn to specified "target" value
 void Manager::turn_to_target(int target)
 {
     motor_controller.rotate_to(target);
 }
 
+// Function to return to 0
 void Manager::turn_to_zero()
 {
     motor_controller.return_to_zero();
@@ -134,4 +155,10 @@ void Manager::turn_to_zero()
 std::vector<std::pair<std::string,double>> Manager::get_rovers() const 
 {
     return rovers;
+}
+
+// Sets while loop flag to false
+void Manager::stop_auto_mode()
+{
+    motor_running = false;
 }

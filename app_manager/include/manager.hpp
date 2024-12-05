@@ -12,10 +12,12 @@ class Manager
 {
 private:
     Motor_Controller motor_controller;
+    bool motor_running;
     std::vector<char*> server_ips;
     
     std::vector<std::pair<std::string, double>> rovers;
 public:
+
     Manager(std::vector<char*> server_ips, int server_port);
 
     ~Manager();
@@ -30,7 +32,7 @@ public:
 
     void turn_to_zero();
 
-    void thread_test();
+    void stop_auto_mode();
 
     std::vector<std::pair<std::string,double>> get_rovers() const;
 };
