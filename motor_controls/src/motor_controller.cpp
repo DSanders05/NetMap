@@ -10,7 +10,7 @@
    Change Mode Function
 */
 
-#define GPIO_LIM_SW_PIN 5          // Physical Pin - 29     Had to change to pin 29 for clock timing for callback function
+#define GPIO_LIM_SW_PIN 5          // Physical Pin - 29     changed to pin 29 for clock timing for callback function
 #define GPIO_DIR_PIN 18             // Physical Pin - 15    HIGH IS CCW, LOW IS CW
 #define GPIO_PUL_PIN 24             // Physical Pin - 10
 
@@ -79,7 +79,7 @@ Motor_Controller::~Motor_Controller()
 void Motor_Controller::initialize_heading()
 {
     // This function will run on initial startup of the antenna
-    // to initialize the heading to a relative 0 degrees
+    // to initialize the headings "zero"
 
     int cb_id = callback_ex(board_address,GPIO_LIM_SW_PIN,EITHER_EDGE,Motor_Controller::heading_callback,this);
     gpio_write(board_address,direction_pin,ctr_clockwise);
@@ -139,18 +139,18 @@ void Motor_Controller::rotate_to(int int_target)
 {
     // Change target to double
     double target = static_cast<double>(int_target);
-    std::cout << "The provided target is: " << target << std::endl;
+    // std::cout << "The provided target is: " << target << std::endl;
 
     // Determine number of steps to new target
-    int difference = round(std::abs((get_heading() - target)/0.3));
+    int difference = std::abs((get_heading() - target)/0.3);
 
     // If we're rotating CW and going to target will take us below 0
     // Swap rotation
-    if (!ctr_clockwise && (get_heading() - target) < 0)
+    if (!ctr_clockwise && (get_heading() - difference) < 0)
     {
         ctr_clockwise = {true};
         gpio_write(board_address,direction_pin,ctr_clockwise);
-        std::cout << "Approaching target counter-clockwise." << std::endl;
+        // std::cout << "Approaching target counter-clockwise." << std::endl;
 
         for (size_t i = 0; i <= difference; i++)
         {
@@ -161,7 +161,7 @@ void Motor_Controller::rotate_to(int int_target)
     else if (!ctr_clockwise)
     {
         gpio_write(board_address,direction_pin,ctr_clockwise);
-        std::cout << "Approaching target clockwise." << std::endl;
+        // std::cout << "Approaching target clockwise." << std::endl;
 
         for (size_t i = 0; i <= difference; i++)
         {
@@ -169,11 +169,11 @@ void Motor_Controller::rotate_to(int int_target)
             set_heading(-0.3f);
         }
     }
-    else if (ctr_clockwise && (get_heading() + target) > 360)
+    else if (ctr_clockwise && (get_heading() + difference) > 360)
     {
         ctr_clockwise = {false};
         gpio_write(board_address,direction_pin,ctr_clockwise);
-        std::cout << "Approaching target clockwise." << std::endl;
+        // std::cout << "Approaching target clockwise." << std::endl;
 
         for (size_t i = 0; i <= difference; i++)
         {
@@ -184,7 +184,7 @@ void Motor_Controller::rotate_to(int int_target)
     else if (ctr_clockwise)
     {
         gpio_write(board_address,direction_pin,ctr_clockwise);
-        std::cout << "Approaching target counter clockwise." << std::endl;
+        // std::cout << "Approaching target counter clockwise." << std::endl;
 
         for (size_t i = 0; i <= difference; i++)
         {
@@ -193,7 +193,7 @@ void Motor_Controller::rotate_to(int int_target)
         }
     }
 
-    std::cout << "After turning to target " << target << " degrees, the current heading is: " << get_heading() << std::endl;
+    // std::cout << "After turning to target " << target << " degrees, the current heading is: " << get_heading() << std::endl;
 }
 
 void Motor_Controller::return_to_zero()

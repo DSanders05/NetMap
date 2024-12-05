@@ -2,7 +2,7 @@
 
 int main()
 {
-    Server app_server = Server(8080);
+    Server app_server = Server();
     app_server.start();
     return 0;
 }

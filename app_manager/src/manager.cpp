@@ -1,7 +1,7 @@
 #include "../include/manager.hpp"
 #include <thread>
 
-Manager::Manager(const std::vector<std::string>& server_ips, int server_port)
+Manager::Manager(std::vector<char*> server_ips, int server_port)
     :motor_controller(),server_ips(server_ips)
 {
 }
@@ -34,24 +34,29 @@ void Manager::start_auto_mode()
                 motor_controller.activate_motor();
                 motor_controller.set_heading(-0.3f);
 
-                if (i % 40 == 0) {  // Poll servers every 4 motor activations
-                    std::vector<std::thread> threads;
+                if (i % 50 == 0) { 
+                        for(auto ip : server_ips){
+                            Client client(ip);
+                            client.attempt_connection(ip);
+                        }
+                    // Poll servers every 4 motor activations
+                    // std::vector<std::thread> threads;
 
-                    for (const auto& ip : server_ips) {
-                        threads.emplace_back([this, ip]() {
-                            Client client(ip, 8080);
-                            std::string response = client.attempt_connection();
-                            if (!response.empty()) {
-                                update_rovers(response);
-                             }
-                        });
-                    }
+                    // for (const auto& ip : server_ips) {
+                    //     threads.emplace_back([this, ip]() {
+                    //         Client client(ip, 8080);
+                    //         std::string response = client.attempt_connection();
+                    //         if (!response.empty()) {
+                    //             update_rovers(response);
+                    //          }
+                    //     });
+                    // }
 
 
-                    // Join threads after polling all IPs
-                    for (auto& thread : threads) {
-                        thread.join();
-                    }
+                    // // Join threads after polling all IPs
+                    // for (auto& thread : threads) {
+                    //     thread.join();
+                    // }
                 }
             }
 
@@ -64,23 +69,27 @@ void Manager::start_auto_mode()
                 motor_controller.activate_motor();
                 motor_controller.set_heading(0.3f);
 
-                if (i % 40 == 0) {
-                    std::vector<std::thread> threads;
+                if (i % 50 == 0) {
+                    for(auto ip : server_ips){
+                        Client client(ip);
+                        client.attempt_connection(ip);
+                    };
+                //     std::vector<std::thread> threads;
 
-                    for (const auto& ip : server_ips) {
-                        threads.emplace_back([this, ip]() {
-                            Client client(ip, 8080);
-                            std::string response = client.attempt_connection();
-                            if (!response.empty()) {
-                                update_rovers(response);
-                            }
-                        });
-                    }
+                //     for (const auto& ip : server_ips) {
+                //         threads.emplace_back([this, ip]() {
+                //             Client client(ip, 8080);
+                //             std::string response = client.attempt_connection();
+                //             if (!response.empty()) {
+                //                 update_rovers(response);
+                //             }
+                //         });
+                //     }
 
 
-                    for (auto& thread : threads) {
-                        thread.join();
-                    }
+                //     for (auto& thread : threads) {
+                //         thread.join();
+                //     }
                 }
             }
 
@@ -94,7 +103,7 @@ void Manager::start_auto_mode()
 }
 
 
-void Manager::setup_zero()
+void Manager::init_zero()
 {
     motor_controller.initialize_heading();
 }
@@ -110,6 +119,16 @@ void Manager::update_rovers(const std::string& signal_strength)
     }
 
     rovers.emplace_back(signal_strength,current_heading);
+}
+
+void Manager::turn_to_target(int target)
+{
+    motor_controller.rotate_to(target);
+}
+
+void Manager::turn_to_zero()
+{
+    motor_controller.return_to_zero();
 }
 
 std::vector<std::pair<std::string,double>> Manager::get_rovers() const 

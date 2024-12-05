@@ -12,5 +12,7 @@ PYBIND11_MODULE(manager_bindings, m) {
         .def("start_auto_mode", &Manager::start_auto_mode)
         .def("setup_zero", &Manager::setup_zero)
         .def("update_rovers", &Manager::update_rovers)
+        .def("turn_to_target", &Manager::turn_to_target)
+        .def("turn_to_zero", &Manager::turn_to_target)
         .def("get_rovers",&Manager::get_rovers);
 }

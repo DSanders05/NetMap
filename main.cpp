@@ -25,14 +25,7 @@ int main(int argc, char* argv[])
     {
         std::cerr << "Python interface error: " << e.what() << std::endl;
     }
-
-    bool running={true};
-    while (running)
-    {
-        continue;
-    }
-    
-    
+        
     // Finalize interpreter
     Py_Finalize();
 

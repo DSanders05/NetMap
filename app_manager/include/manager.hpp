@@ -12,19 +12,25 @@ class Manager
 {
 private:
     Motor_Controller motor_controller;
-    std::vector<std::string> server_ips;
+    std::vector<char*> server_ips;
     
     std::vector<std::pair<std::string, double>> rovers;
 public:
-    Manager(const std::vector<std::string>& server_ips, int server_port);
+    Manager(std::vector<char*> server_ips, int server_port);
 
     ~Manager();
 
     void start_auto_mode();
 
-    void setup_zero();
+    void init_zero();
 
     void update_rovers(const std::string& signal_strength);
+
+    void turn_to_target(int target);
+
+    void turn_to_zero();
+
+    void thread_test();
 
     std::vector<std::pair<std::string,double>> get_rovers() const;
 };

@@ -6,12 +6,12 @@
 class Server
 {
 private:
-    int server_port;
+    int server_port = {8080};
 
  public:
-    Server(int port);
+    Server();
     void start();
-    std::string get_sig_str();
+    // std::string get_sig_str();
 };
 
 #endif
