@@ -12,7 +12,7 @@ PYBIND11_MODULE(manager_bindings, m) {
     // Defines the class Manager to python
     // with each ".def" method exposing these functions to python
     py::class_<Manager>(m, "Manager")
-        .def(py::init<const std::vector<std::string>&, int>(), py::arg("server_ips"), py::arg("server_port"))
+        .def(py::init<const std::vector<char*>&, int>(), py::arg("server_ips"), py::arg("server_port"))
         .def("start_auto_mode", &Manager::start_auto_mode)
         .def("init_zero", &Manager::init_zero)
         .def("update_rovers", &Manager::update_rovers)
