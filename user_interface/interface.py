@@ -32,8 +32,10 @@ class NetMapApp(ttk.Window):
 
     # Swaps page frames
     def show_frame(self, page_name):
+        print("In show_frame")
         frame = self.frames[page_name]
         frame.tkraise()
+        print(f"Called frame.tkraise({page_name}) in show_frame",frame)
 
     # Starts thread to run the motor in to keep from blocking interface
     def start_motor(self):
@@ -70,7 +72,9 @@ class InitPage(ttk.Frame):
         start_button.pack(pady=(60,0))
 
     def start_scan(self,parent):
+        print("About to show_frame AutoModePage")
         parent.show_frame("AutoModePage")
+        print("About to start_motor")
         parent.start_motor()
 
 
