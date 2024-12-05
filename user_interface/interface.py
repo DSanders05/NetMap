@@ -25,6 +25,7 @@ class NetMapApp(ttk.Window):
         for PageClass in (InitPage, AutoModePage, ManualPage):
             page = PageClass(self)
             self.frames[PageClass.__name__] = page
+            print("PageClass.__name__ : ", PageClass.__name__)
             page.place(relwidth=1, relheight=1)
 
         # Show the initialization page
