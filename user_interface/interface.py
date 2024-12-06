@@ -13,6 +13,7 @@ from manager_bindings import Manager, is_queue_empty, get_from_queue
 manager = Manager(["127.0.0.1"],8080)
 
 frames = {}
+rover_values = {}
 
 class NetMapApp(ttk.Window):
     def __init__(self):
@@ -21,7 +22,7 @@ class NetMapApp(ttk.Window):
         # Vars for page frame list, motor thread, and thread running flag (bool)
         # self.frames = {}
         self.frame
-        self.rover_values
+        # self.rover_values
 
         # Create page frames
         for PageClass in (InitPage, AutoModePage, ManualPage):
@@ -124,8 +125,9 @@ class AutoModePage(ttk.Frame):
     def target_rover(self):
         selected_rover = self.rovers_table.focus()
         if selected_rover:
-            self.parent.rover_values = self.rovers_table.item(selected_rover,"values")
-            return self.parent.rover_values
+            # self.parent.rover_values = self.rovers_table.item(selected_rover,"values")
+            rover_values = self.rovers_table.item(selected_rover,"values")
+            return rover_values
         return None
 
 
@@ -136,7 +138,8 @@ class ManualPage(ttk.Frame):
 
         self.parent = parent
 
-        selected_values = self.parent.rover_values
+        # selected_values = self.parent.rover_values
+        selected_values = rover_values
         if selected_values:
             rover, ip, heading = selected_values
         
