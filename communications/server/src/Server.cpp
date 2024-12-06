@@ -135,7 +135,7 @@ void Server::start()
     }
 
     address.sin_family = {AF_INET};
-    address.sin_addr.s_addr = {inet_addr("192.168.3.23")};
+    address.sin_addr.s_addr = {inet_addr("172.19.175.177")};
     address.sin_port = {htons(8080)};
 
     // Bind socket to IP and port    
@@ -151,6 +151,8 @@ void Server::start()
         std::cerr << "Listen failed." << std::endl;
         exit(EXIT_FAILURE);
     }
+    
+    std::cout << "Listening on port: " << 8080 << std::endl;
 
     // Accept incoming connection
     if ((new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen)) < 0)
@@ -158,6 +160,7 @@ void Server::start()
         std::cerr << "Accept failed." << std::endl;
         exit(EXIT_FAILURE);
     }
+
 
     // Read message from client
     read(new_socket,buffer,1024);

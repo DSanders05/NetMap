@@ -10,7 +10,7 @@ sys.path.append("/home/ech024/NetMap/build/bindings")
 import manager_bindings
 
 # Creates a Manager instance for C++ functions
-manager = manager_bindings.Manager(["192.168.3.23","192.168.3.33"],8080)
+manager = manager_bindings.Manager(["127.0.0.1"],8080)
 
 frames = {}
 
