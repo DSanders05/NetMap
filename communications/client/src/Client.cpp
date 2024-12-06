@@ -8,8 +8,8 @@
 
 #define PORT 8080
 
-Client::Client(char* server_ip, int server_port)
-    : server_ip(server_ip), server_port(server_port) {}
+Client::Client(const std::string& ip, int port)
+    : server_ip(ip), server_port(port) {}
 
 // std::string Client::attempt_connection() {
 //     std::cout << "Attempting to connect to server: " << server_ip << ":" << server_port << std::endl;
@@ -94,6 +94,10 @@ int Client::attempt_connection()
     timeout.tv_sec = 2; // 2 second timeout
     timeout.tv_usec = 0;
 
+    // Configure server address
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(server_port);
+
     if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0 ||
         setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) 
     {
@@ -102,11 +106,7 @@ int Client::attempt_connection()
         return -1;
     }
 
-    // Configure server address
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(server_port);
-
-    if (inet_pton(AF_INET, server_ip, &serv_addr.sin_addr) <= 0) 
+    if (inet_pton(AF_INET, server_ip.c_str(), &serv_addr.sin_addr) <= 0) 
     {
         std::cerr << "Invalid server IP address: " << server_ip << std::endl;
         close(sock);

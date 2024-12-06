@@ -6,11 +6,11 @@
 class Client
 {
 private:
-    char* server_ip;
+    const std::string& server_ip;
     int server_port;
 
 public:
-    Client(char* server_ip, int server_port);
+    Client(const std::string& server_ip, int server_port);
 
     // std::string attempt_connection();
 
