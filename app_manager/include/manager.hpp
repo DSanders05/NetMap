@@ -38,6 +38,12 @@ public:
     void turn_to_zero();
 
     void stop_auto_mode();
+
+    void add_to_queue(const std::string& rover_ip,int heading);
+
+    std::pair<std::string,int> get_from_queue();
+
+    bool is_queue_empty();
 };
 
 #endif

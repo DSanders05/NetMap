@@ -4,7 +4,7 @@ import os
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 import threading
-sys.path.append("/home/ech024/NetMap/build/bindings")
+sys.path.append("/home/ncpa/NetMap/build/bindings")
 
 # Imports pybind bindings
 import manager_bindings

@@ -20,4 +20,7 @@ PYBIND11_MODULE(manager_bindings, m) {
         .def("turn_to_target",&Manager::turn_to_target)
         .def("turn_to_zero",&Manager::turn_to_target)
         .def("stop_auto_mode",&Manager::stop_auto_mode);
+
+    m.def("get_from_queue",&Manager::get_from_queue);
+    m.def("is_queue_empty",&Manager::is_queue_empty);
 }

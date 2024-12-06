@@ -1,8 +1,13 @@
 #include <pybind11/pybind11.h>
 #include "../include/manager.hpp"
 #include <thread>
+#include <queue>
+#include <mutex>
 
 namespace py = pybind11;
+
+std::queue<std::pair<std::string,int>> data_queue;
+std::mutex queue_mutex;
 
 // Manager Constructor
 Manager::Manager(std::vector<std::string>& server_ips, int server_port)
@@ -58,6 +63,8 @@ void Manager::start_auto_mode()
                 motor_controller.activate_motor();
                 motor_controller.set_heading(-0.3f);
 
+                 if (!motor_running) break;
+                 
                 // After every 15 degrees attempt to connect to ground vehicles
                 if (i % 50 == 0) { 
                     for(auto ip : server_ips)
@@ -65,9 +72,7 @@ void Manager::start_auto_mode()
                         Client client(ip,8080);
                         if(client.attempt_connection() == 1)
                         {
-                            // This is where we'll update the user interface
-                            std::cout << "Successfully connected to " << ip << std::endl;
-                            time_sleep(.5);
+                            add_to_queue(ip,motor_controller.get_heading());
                         }
                     }
                 }
@@ -86,6 +91,8 @@ void Manager::start_auto_mode()
                 // This loop is for CCW rotation so we add 0.3 until 360 degrees
                 motor_controller.set_heading(0.3f);
 
+                 if (!motor_running) break;
+
                 // After every 15 degrees we try to connect to ground vehicles
                 if (i % 50 == 0) {
                     for(auto ip : server_ips)
@@ -93,7 +100,7 @@ void Manager::start_auto_mode()
                         Client client(ip,8080);
                         if(client.attempt_connection() == 1)
                         {
-                            std::cout << "Successfully connected to " << ip << std::endl;
+                            add_to_queue(ip,motor_controller.get_heading());
                         }
                     }
                 }
@@ -148,4 +155,29 @@ void Manager::stop_auto_mode()
             motor_thread.join();
         }   
     }
+}
+
+void Manager::add_to_queue(const std::string& rover_ip, int heading)
+{
+    std::lock_guard<std::mutex> lock(queue_mutex);
+    data_queue.emplace(rover_ip,heading);
+}
+
+std::pair<std::string,int> Manager::get_from_queue()
+{
+    std::lock_guard<std::mutex> lock(queue_mutex);
+    if (data_queue.empty())
+    {
+        return {"",-1};
+    }
+    
+    auto data = data_queue.front();
+    data_queue.pop();
+    return data;
+}
+
+bool Manager::is_queue_empty()
+{
+    std::lock_guard<std::mutex> lock(queue_mutex);
+    return data_queue.empty();
 }
