@@ -171,7 +171,7 @@ void Manager::add_to_queue(const std::string& rover_ip, int heading)
     data_queue.emplace(rover_ip,heading);
 }
 
-std::pair<std::string,int> Manager::get_from_queue()
+std::pair<std::string,int> get_from_queue()
 {
     std::lock_guard<std::mutex> lock(queue_mutex);
     if (data_queue.empty())
@@ -184,7 +184,7 @@ std::pair<std::string,int> Manager::get_from_queue()
     return data;
 }
 
-bool Manager::is_queue_empty()
+bool is_queue_empty()
 {
     std::lock_guard<std::mutex> lock(queue_mutex);
     return data_queue.empty();
