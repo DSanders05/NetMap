@@ -13,7 +13,6 @@ from manager_bindings import manager_bindings, is_queue_empty, get_from_queue
 manager = manager_bindings.Manager(["127.0.0.1"],8080)
 
 frames = {}
-count = 0
 
 class NetMapApp(ttk.Window):
     def __init__(self):
@@ -22,8 +21,7 @@ class NetMapApp(ttk.Window):
         # Vars for page frame list, motor thread, and thread running flag (bool)
         # self.frames = {}
         self.frame
-        self.motor_thread = None
-        self.motor_running = threading.Event()
+        self.rover_values
 
         # Create page frames
         for PageClass in (InitPage, AutoModePage, ManualPage):
@@ -36,7 +34,7 @@ class NetMapApp(ttk.Window):
         start_button = ttk.Button(frames["InitPage"], text="Start Auto Scan", command=lambda: self.start_scan())
         start_button.pack(pady=(60,0))
 
-        connect_button = ttk.Button(frames["AutoModePage"].option_frame, text="Connect", command=lambda: (self.stop_motor(),self.show_frame("ManualPage")))
+        connect_button = ttk.Button(frames["AutoModePage"].option_frame, text="Connect", command=lambda: (self.stop_motor(),self.target_rover(),self.show_frame("ManualPage")))
         connect_button.pack(fill=X,pady=100)
 
         return_button = ttk.Button(frames["ManualPage"].button_frame,text="Return to Auto Mode",command=lambda:{self.show_frame("AutoModePage"),self.start_scan()})
@@ -84,6 +82,8 @@ class AutoModePage(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
 
+        self.parent = parent
+
         # Auto Scan Banner
         banner = ttk.Label(self, text="AUTO SCAN", font=("Arial", 30, "bold"), anchor="center")
         banner.pack(pady=20)
@@ -107,24 +107,38 @@ class AutoModePage(ttk.Frame):
         self.option_frame = ttk.Frame(content_frame)
         self.option_frame.pack(side=RIGHT,expand=True,fill=BOTH)
 
+        self.count = 0
         self.process_queue()
 
     def process_queue(self):
         while not is_queue_empty():
             rover_ip, heading = get_from_queue()
             if rover_ip:
-               self.add_rover(count,rover_ip,heading)
-               count += 1
+               self.add_rover(self.count,rover_ip,heading)
+               self.count += 1
         self.after(200,self.process_queue)
 
     def add_rover(self,rover_num,rover_ip,heading):
         self.rovers_table.insert("","end",values=(f"Rover {rover_num}",rover_ip,heading))
+
+    def target_rover(self):
+        selected_rover = self.rovers_table.focus()
+        if selected_rover:
+            self.parent.rover_values = self.rovers_table.item(selected_rover,"values")
+            return self.parent.rover_values
+        return None
 
 
 
 class ManualPage(ttk.Frame):
     def __init__(self,parent):
         super().__init__(parent)
+
+        self.parent = parent
+
+        selected_values = self.parent.rover_values
+        if selected_values:
+            rover, ip, heading = selected_values
         
         # Manual Mode Banner
         banner = ttk.Label(self, text="Manual Mode", font=("Arial", 30, "bold"), anchor="center")
@@ -133,19 +147,19 @@ class ManualPage(ttk.Frame):
         content_frame = ttk.Frame(self)
         content_frame.pack(expand=True,fill=BOTH,padx=20,pady=20)
 
-        connection_frame = ttk.Labelframe(content_frame,text="Connection Status")
+        connection_frame = ttk.Labelframe(content_frame,text=f"Rover {rover}")
         connection_frame.pack(side=LEFT,fill=BOTH,expand=True,padx=10)
 
         ip_label = ttk.Label(connection_frame,anchor=W,text="Rover IP:")
         ip_label.grid(row=1,column=1,pady=(50,0),padx=(30,0))
 
-        ip_value = ttk.Label(connection_frame,text= "Dummy Value")
+        ip_value = ttk.Label(connection_frame,text= f"{ip}")
         ip_value.grid(row=1,column=2,pady=(50,0),padx=(30,0))
 
         loc_label = ttk.Label(connection_frame,anchor=W,text="Angular Location")
         loc_label.grid(row=2,column=1,pady=(50,0),padx=(50,0))
 
-        loc_value = ttk.Label(connection_frame,text="56")
+        loc_value = ttk.Label(connection_frame,text=f"{heading}")
         loc_value.grid(row=2,column=2,pady=(50,0),padx=(50,0))
 
         self.button_frame = ttk.Frame(content_frame)
