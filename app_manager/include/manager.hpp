@@ -14,14 +14,14 @@ class Manager
 {
 private:
     Motor_Controller motor_controller;
-    std::vector<const std::string&> server_ips;
+    std::vector<const std::string> server_ips;
     std::atomic<bool> motor_running = {false};
     std::thread motor_thread;
 
     std::vector<std::pair<std::string, double>> rovers;
 public:
 
-    Manager(std::vector<const std::string&> server_ips, int server_port);
+    Manager(std::vector<const std::string>& server_ips, int server_port);
 
     ~Manager();
 
