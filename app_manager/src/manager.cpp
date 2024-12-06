@@ -34,6 +34,8 @@ void Manager::start_thread()
 // Auto Mode Logic
 void Manager::start_auto_mode()
 {
+    py::gil_scoped_release lock_release;
+    
     // First time entering auto mode will init heading
     // After that this will be bypassed
     if (!motor_controller.get_heading_init()) {
@@ -65,6 +67,7 @@ void Manager::start_auto_mode()
                         Client client(ip,8080);
                         if(client.attempt_connection() == 1)
                         {
+                            // This is where we'll update the user interface
                             std::cout << "Successfully connected to " << ip << std::endl;
                         }
                     }

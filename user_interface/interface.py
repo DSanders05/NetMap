@@ -109,6 +109,9 @@ class AutoModePage(ttk.Frame):
         self.option_frame = ttk.Frame(content_frame)
         self.option_frame.pack(side=RIGHT,expand=True,fill=BOTH)
 
+    def add_rover(self,rov_values):
+        self.rovers_table.insert("","end",values=rov_values)
+
 
 
 
