@@ -60,6 +60,7 @@ class NetMapApp(ttk.Window):
         try:
             print("Starting motor in separate thread.")
             manager.start_thread()
+            print("Motor thread started.")
         except Exception as e:
             print(f"Error starting motor control loop: {e}")
 
