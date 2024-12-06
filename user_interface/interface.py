@@ -7,10 +7,10 @@ import threading
 sys.path.append("/home/ncpa/NetMap/build/bindings")
 
 # Imports pybind bindings
-from manager_bindings import manager_bindings, is_queue_empty, get_from_queue
+from manager_bindings import Manager, is_queue_empty, get_from_queue
 
 # Creates a Manager instance for C++ functions
-manager = manager_bindings.Manager(["127.0.0.1"],8080)
+manager = Manager(["127.0.0.1"],8080)
 
 frames = {}
 
