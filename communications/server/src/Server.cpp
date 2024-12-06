@@ -154,6 +154,10 @@ void Server::start()
     
     std::cout << "Listening on port: " << 8080 << std::endl;
 
+    while (true)
+    {
+        
+    
     // Accept incoming connection
     if ((new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen)) < 0)
     {
@@ -169,5 +173,7 @@ void Server::start()
     send(new_socket, ack_message.c_str(), ack_message.size(),0);
     
     close(new_socket);
+    memset(buffer,0,sizeof(buffer));
+    }
     close(server_fd);
 }
