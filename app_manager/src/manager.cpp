@@ -41,7 +41,7 @@ void Manager::start_auto_mode()
     // If we're re-entering from manual mode go back to "0" before continuing
     // Going back to "0" just lets us ignore our heading when re-entering and gives a 
     // common starting point for code below.
-    motor_controller.return_to_zero();
+    // motor_controller.return_to_zero();
 
     while (motor_running) {
         //  Always enter this loop with heading = 0 and CCW flag set to false

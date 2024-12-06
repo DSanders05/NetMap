@@ -29,7 +29,6 @@ class NetMapApp(ttk.Window):
             page = PageClass(self)
             # self.frames[PageClass.__name__] = page
             frames[PageClass.__name__] = page
-            print("PageClass.__name__ : ", PageClass.__name__)
             page.place(relwidth=1, relheight=1)
 
         # Start button for AUTO Mode
@@ -43,27 +42,26 @@ class NetMapApp(ttk.Window):
         return_button.pack(anchor=CENTER,pady=100)
 
         # Show the initialization page
-        print("Showing first page with show_frame")
         self.show_frame("InitPage")
 
     # Swaps page frames
     def show_frame(self, page_name):
-        print("In show_frame")
         # frame = self.frames[page_name]
         self.frame = frames[page_name]
         self.frame.tkraise()
-        print(f"Called frame.tkraise({page_name}) in show_frame",self.frame)
 
     def start_scan(self):
-        print("About to show_frame AutoModePage")
         self.show_frame("AutoModePage")
-        print("About to start_motor")
         self.start_motor()
 
     # Starts thread to run the motor in to keep from blocking interface
     def start_motor(self):
         # Starting auto mode in separate thread
-        manager.start_thread()
+        try:
+            print("Starting motor in separate thread.")
+            manager.start_thread()
+        except Exception as e:
+            print(f"Error starting motor control loop: {e}")
 
     # Start Manager objects auto_mode
     # def run_motor(self):
