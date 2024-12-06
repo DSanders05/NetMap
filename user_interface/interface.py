@@ -38,7 +38,7 @@ class NetMapApp(ttk.Window):
         connect_button = ttk.Button(frames["AutoModePage"].option_frame, text="Connect", command=lambda: (self.stop_motor(),self.show_frame("ManualPage")))
         connect_button.pack(fill=X,pady=100)
 
-        return_button = ttk.Button(frames["ManualPage"].button_frame,text="Return to Auto Mode",command=lambda:{self.show_frame("AutoModePage")})
+        return_button = ttk.Button(frames["ManualPage"].button_frame,text="Return to Auto Mode",command=lambda:{self.show_frame("AutoModePage"),self.start_scan()})
         return_button.pack(anchor=CENTER,pady=100)
 
         # Show the initialization page
