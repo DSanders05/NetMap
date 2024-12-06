@@ -5,7 +5,7 @@
 namespace py = pybind11;
 
 // Manager Constructor
-Manager::Manager(std::vector<char*> server_ips, int server_port)
+Manager::Manager(std::vector<const std::string&> server_ips, int server_port)
     :motor_controller(),server_ips(server_ips)
 {
 }
