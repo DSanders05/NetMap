@@ -35,7 +35,7 @@ class NetMapApp(ttk.Window):
         start_button = ttk.Button(frames["InitPage"], text="Start Auto Scan", command=lambda: self.start_scan())
         start_button.pack(pady=(60,0))
 
-        connect_button = ttk.Button(frames["AutoModePage"].option_frame, text="Connect", command=lambda: (self.stop_motor(), frames["AutoModePage"].target_rover(), frames["ManualPage"].update_labels(), self.show_frame("ManualPage")))
+        connect_button = ttk.Button(frames["AutoModePage"].option_frame, text="Connect", command=lambda: (self.stop_motor(), frames["AutoModePage"].target_rover(), frames["ManualPage"].update_labels(), self.show_frame("ManualPage"), manager.turn_to_target(frames["ManualPage"].heading)))
         connect_button.pack(fill=X,pady=100)
 
         return_button = ttk.Button(frames["ManualPage"].button_frame,text="Return to Auto Mode",command=lambda:{self.show_frame("AutoModePage"),self.start_scan()})
@@ -101,6 +101,11 @@ class AutoModePage(ttk.Frame):
         rovers_frame = ttk.Labelframe(content_frame, text="Rovers")
         rovers_frame.pack()
 
+        blank_frame = ttk.Frame(content_frame)
+        blank_frame.pack()
+        blank_frame2 = ttk.Frame(content_frame)
+        blank_frame2.pack()
+
 
         columns = ("Rover", "Rover Ip", "Location")
         self.rovers_table = ttk.Treeview(rovers_frame, columns=columns, show="headings", height=10)
@@ -138,12 +143,14 @@ class ManualPage(ttk.Frame):
         super().__init__(parent)
 
         self.parent = parent
-
+        self.rover = 0
+        self.ip = ""
+        self.heading = 0
         # selected_values = self.parent.rover_values
         selected_values = rover_values
-        rover, ip, heading = ("","","")
+        # rover, ip, heading = ("","","")
         if selected_values:
-            rover, ip, heading = selected_values
+            self.rover, self.ip, self.heading = selected_values
         
         # Manual Mode Banner
         banner = ttk.Label(self, text="Manual Mode", font=("Arial", 30, "bold"), anchor="center")
@@ -152,19 +159,19 @@ class ManualPage(ttk.Frame):
         content_frame = ttk.Frame(self)
         content_frame.pack(expand=True,fill=BOTH,padx=20,pady=20)
 
-        self.connection_frame = ttk.Labelframe(content_frame,text=f"Rover {rover}")
+        self.connection_frame = ttk.Labelframe(content_frame,text=f"Rover {self.rover}")
         self.connection_frame.pack(side=LEFT,fill=BOTH,expand=True,padx=10)
 
-        ip_label = ttk.Label(self.connection_frames,anchor=W,text="Rover IP:")
+        ip_label = ttk.Label(self.connection_frame,anchor=W,text="Rover IP:")
         ip_label.grid(row=1,column=1,pady=(50,0),padx=(30,0))
 
-        self.ip_value = ttk.Label(self.connection_frame,text= f"{ip}")
+        self.ip_value = ttk.Label(self.connection_frame,text= f"{self.ip}")
         self.ip_value.grid(row=1,column=2,pady=(50,0),padx=(30,0))
 
         self.loc_label = ttk.Label(self.connection_frame,anchor=W,text="Angular Location")
         self.loc_label.grid(row=2,column=1,pady=(50,0),padx=(50,0))
 
-        self.loc_value = ttk.Label(self.connection_frame,text=f"{heading}")
+        self.loc_value = ttk.Label(self.connection_frame,text=f"{self.heading}")
         self.loc_value.grid(row=2,column=2,pady=(50,0),padx=(50,0))
 
         self.button_frame = ttk.Frame(content_frame)
@@ -172,12 +179,14 @@ class ManualPage(ttk.Frame):
 
     def update_labels(self):
         selected_values = rover_values
-        rover, ip, heading = ("","","")
+        self.rover = 0
+        self.ip = ""
+        self.heading=0
         if selected_values:
-            rover, ip, heading = selected_values
-        self.connection_frame.config(text=f"Rover {rover}")
-        self.ip_value.config(text = f"{ip}")
-        self.loc_value.config(text = f"{heading}")
+            self.rover, self.ip, self.heading = selected_values
+        self.connection_frame.config(text=f"Rover {self.rover}")
+        self.ip_value.config(text = f"{self.ip}")
+        self.loc_value.config(text = f"{self.heading}")
 
 
 def start_ui():
