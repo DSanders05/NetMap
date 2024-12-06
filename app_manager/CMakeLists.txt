@@ -4,4 +4,9 @@ add_library(app_manager STATIC src/manager.cpp)
 set_target_properties(app_manager PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Include App Manager Headers
-target_include_directories(app_manager PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(app_manager PUBLIC 
+                ${CMAKE_CURRENT_SOURCE_DIR}/include
+                ${Python3_INCLUDE_DIRS}
+)
+
+target_link_libraries(app_manager PUBLIC ${Python3_LIBRARIES})

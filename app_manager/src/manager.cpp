@@ -1,5 +1,8 @@
+#include <pybind11/pybind11.h>
 #include "../include/manager.hpp"
 #include <thread>
+
+namespace py = pybind11;
 
 // Manager Constructor
 Manager::Manager(std::vector<char*> server_ips, int server_port)
@@ -13,6 +16,16 @@ Manager::~Manager()
     motor_controller.~Motor_Controller();
 
     std::cout << "App manager has been deconstructed." << std::endl;
+}
+
+void Manager::start_thread()
+{
+    if (!motor_running)
+    {
+        motor_running = {true};
+        motor_thread = std::thread(&Manager::start_auto_mode, this);
+    }
+    
 }
 
 // Auto Mode Logic
@@ -30,9 +43,6 @@ void Manager::start_auto_mode()
     // common starting point for code below.
     motor_controller.return_to_zero();
 
-    // Flag to exit loop when we change modes
-    motor_running = {true};
-
     while (motor_running) {
         //  Always enter this loop with heading = 0 and CCW flag set to false
         if (motor_controller.get_ctr_clockwise()) {
@@ -47,34 +57,19 @@ void Manager::start_auto_mode()
 
                 // After every 15 degrees attempt to connect to ground vehicles
                 if (i % 50 == 0) { 
-                        for(auto ip : server_ips){
-                            Client client(ip,8080);
-                            if(client.attempt_connection() == 1)
-                            {
-                                std::cout << "Successfully connected to " << ip << std::endl;
-                            }
+                    for(auto ip : server_ips)
+                    {
+                        Client client(ip,8080);
+                        if(client.attempt_connection() == 1)
+                        {
+                            std::cout << "Successfully connected to " << ip << std::endl;
                         }
-                    // Poll servers every 4 motor activations
-                    // std::vector<std::thread> threads;
-
-                    // for (const auto& ip : server_ips) {
-                    //     threads.emplace_back([this, ip]() {
-                    //         Client client(ip, 8080);
-                    //         std::string response = client.attempt_connection();
-                    //         if (!response.empty()) {
-                    //             update_rovers(response);
-                    //          }
-                    //     });
-                    // }
-
-
-                    // // Join threads after polling all IPs
-                    // for (auto& thread : threads) {
-                    //     thread.join();
-                    // }
+                    }
                 }
             }
-        } else {
+        } 
+        else 
+        {
             // Swap rotation direction and repeat steps from above
             motor_controller.set_ctr_clockwise(true);
             gpio_write(motor_controller.board_address, motor_controller.direction_pin, motor_controller.get_ctr_clockwise());
@@ -88,29 +83,14 @@ void Manager::start_auto_mode()
 
                 // After every 15 degrees we try to connect to ground vehicles
                 if (i % 50 == 0) {
-                    for(auto ip : server_ips){
+                    for(auto ip : server_ips)
+                    {
                         Client client(ip,8080);
-                       if(client.attempt_connection() == 1)
-                       {
+                        if(client.attempt_connection() == 1)
+                        {
                             std::cout << "Successfully connected to " << ip << std::endl;
-                       }
-                    };
-                //     std::vector<std::thread> threads;
-
-                //     for (const auto& ip : server_ips) {
-                //         threads.emplace_back([this, ip]() {
-                //             Client client(ip, 8080);
-                //             std::string response = client.attempt_connection();
-                //             if (!response.empty()) {
-                //                 update_rovers(response);
-                //             }
-                //         });
-                //     }
-
-
-                //     for (auto& thread : threads) {
-                //         thread.join();
-                //     }
+                        }
+                    }
                 }
             }
         }
@@ -152,13 +132,15 @@ void Manager::turn_to_zero()
     motor_controller.return_to_zero();
 }
 
-std::vector<std::pair<std::string,double>> Manager::get_rovers() const 
-{
-    return rovers;
-}
-
 // Sets while loop flag to false
 void Manager::stop_auto_mode()
 {
-    motor_running = false;
+    if (motor_running)
+    {
+        motor_running = {false};
+        if (motor_thread.joinable())
+        {
+            motor_thread.join();
+        }   
+    }
 }

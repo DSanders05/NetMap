@@ -4,13 +4,13 @@ import os
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 import threading
-sys.path.append("/home/ech0/NetMap/build/bindings")
+sys.path.append("/home/ech024/NetMap/build/bindings")
 
 # Imports pybind bindings
 import manager_bindings
 
 # Creates a Manager instance for C++ functions
-manager = manager_bindings.Manager(["192.168.2.22"],8080)
+manager = manager_bindings.Manager(["192.168.3.23","192.168.3.33"],8080)
 
 frames = {}
 
@@ -32,7 +32,7 @@ class NetMapApp(ttk.Window):
             print("PageClass.__name__ : ", PageClass.__name__)
             page.place(relwidth=1, relheight=1)
 
-# Start button for AUTO Mode
+        # Start button for AUTO Mode
         start_button = ttk.Button(frames["InitPage"], text="Start Auto Scan", command=lambda: self.start_scan())
         start_button.pack(pady=(60,0))
 
@@ -62,25 +62,19 @@ class NetMapApp(ttk.Window):
 
     # Starts thread to run the motor in to keep from blocking interface
     def start_motor(self):
-        if not self.motor_thread or not self.motor_thread.is_alive():
-            self.motor_running.set()
-            self.motor_thread = threading.Thread(target=self.run_motor)
-            self.motor_thread.start()
+        # Starting auto mode in separate thread
+        manager.start_thread()
 
     # Start Manager objects auto_mode
-    def run_motor(self):
-        try:
-            manager.start_auto_mode()
-        except Exception as e:
-            print(f"Error starting auto mode: {e}")
+    # def run_motor(self):
+    #     try:
+    #         manager.start_auto_mode()
+    #     except Exception as e:
+    #         print(f"Error starting auto mode: {e}")
 
-    # Exits the Managers auto_mode loop
+    # Stop the auto_mode thread
     def stop_motor(self):
-        """Stop stepper motor"""
-        if self.motor_thread and self.motor_thread.is_alive():
-            self.motor_running.clear()
-            manager.stop_auto_mode()
-            self.motor_thread.join()
+        manager.stop_auto_mode()
 
 class InitPage(ttk.Frame):
     def __init__(self, parent):

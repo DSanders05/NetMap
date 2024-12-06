@@ -7,20 +7,25 @@
 #include <utility>
 #include "../../communications/client/include/Client.hpp"
 #include "../../motor_controls/include/motor_controller.hpp"
+#include <atomic>
+#include <thread>
 
 class Manager
 {
 private:
     Motor_Controller motor_controller;
-    bool motor_running;
     std::vector<char*> server_ips;
-    
+    std::atomic<bool> motor_running;
+    std::thread motor_thread;
+
     std::vector<std::pair<std::string, double>> rovers;
 public:
 
     Manager(std::vector<char*> server_ips, int server_port);
 
     ~Manager();
+
+    void start_thread();
 
     void start_auto_mode();
 
@@ -33,8 +38,6 @@ public:
     void turn_to_zero();
 
     void stop_auto_mode();
-
-    std::vector<std::pair<std::string,double>> get_rovers() const;
 };
 
 #endif
