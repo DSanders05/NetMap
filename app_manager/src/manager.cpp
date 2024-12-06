@@ -67,6 +67,7 @@ void Manager::start_auto_mode()
                         {
                             // This is where we'll update the user interface
                             std::cout << "Successfully connected to " << ip << std::endl;
+                            time_sleep(.5);
                         }
                     }
                 }
