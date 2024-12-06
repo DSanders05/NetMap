@@ -7,12 +7,13 @@ import threading
 sys.path.append("/home/ncpa/NetMap/build/bindings")
 
 # Imports pybind bindings
-import manager_bindings
+from manager_bindings import manager_bindings, is_queue_empty, get_from_queue
 
 # Creates a Manager instance for C++ functions
 manager = manager_bindings.Manager(["127.0.0.1"],8080)
 
 frames = {}
+count = 0
 
 class NetMapApp(ttk.Window):
     def __init__(self):
@@ -95,6 +96,7 @@ class AutoModePage(ttk.Frame):
         rovers_frame = ttk.Labelframe(content_frame, text="Rovers")
         rovers_frame.pack(side=LEFT, fill=BOTH, expand=True, padx=10)
 
+
         columns = ("Rover", "Rover Ip", "Location")
         self.rovers_table = ttk.Treeview(rovers_frame, columns=columns, show="headings", height=10)
         for col in columns:
@@ -105,9 +107,18 @@ class AutoModePage(ttk.Frame):
         self.option_frame = ttk.Frame(content_frame)
         self.option_frame.pack(side=RIGHT,expand=True,fill=BOTH)
 
-    def add_rover(self,rov_values):
-        self.rovers_table.insert("","end",values=rov_values)
+        self.process_queue()
 
+    def process_queue(self):
+        while not is_queue_empty():
+            rover_ip, heading = get_from_queue()
+            if rover_ip:
+               self.add_rover(count,rover_ip,heading)
+               count += 1
+        self.after(200,self.process_queue)
+
+    def add_rover(self,rover_num,rover_ip,heading):
+        self.rovers_table.insert("","end",values=(f"Rover {rover_num}",rover_ip,heading))
 
 
 
