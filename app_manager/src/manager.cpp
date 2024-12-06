@@ -63,7 +63,11 @@ void Manager::start_auto_mode()
                 motor_controller.activate_motor();
                 motor_controller.set_heading(-0.3f);
 
-                 if (!motor_running) break;
+                 if (!motor_running)
+                 {
+                    gpio_write(motor_controller.board_address,motor_controller.pulse_pin,PI_LOW);
+                    return;
+                 }
                  
                 // After every 15 degrees attempt to connect to ground vehicles
                 if (i % 50 == 0) { 
@@ -91,7 +95,11 @@ void Manager::start_auto_mode()
                 // This loop is for CCW rotation so we add 0.3 until 360 degrees
                 motor_controller.set_heading(0.3f);
 
-                 if (!motor_running) break;
+                 if (!motor_running)
+                 {
+                    gpio_write(motor_controller.board_address,motor_controller.pulse_pin,PI_LOW);
+                    return;
+                 }
 
                 // After every 15 degrees we try to connect to ground vehicles
                 if (i % 50 == 0) {
