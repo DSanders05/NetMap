@@ -58,22 +58,18 @@ class NetMapApp(ttk.Window):
     def start_motor(self):
         # Starting auto mode in separate thread
         try:
-            print("Starting motor in separate thread.")
-            manager.start_thread()
-            print("Motor thread started.")
+            threading.Thread(target=manager.start_thread,daemon=True).start()
+            # manager.start_thread()
         except Exception as e:
             print(f"Error starting motor control loop: {e}")
-
-    # Start Manager objects auto_mode
-    # def run_motor(self):
-    #     try:
-    #         manager.start_auto_mode()
-    #     except Exception as e:
-    #         print(f"Error starting auto mode: {e}")
 
     # Stop the auto_mode thread
     def stop_motor(self):
         manager.stop_auto_mode()
+
+    def on_close(self):
+        self.stop_motor()
+        self.destroy()
 
 class InitPage(ttk.Frame):
     def __init__(self, parent):
@@ -147,6 +143,7 @@ class ManualPage(ttk.Frame):
 
 def start_ui():
     app = NetMapApp()
+    app.protocol("WM_DELETE_WINDOW",app.on_close)
     app.mainloop()
 
 if __name__ == "__main__":

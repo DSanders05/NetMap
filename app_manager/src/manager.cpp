@@ -23,18 +23,16 @@ void Manager::start_thread()
     std::cout << "Starting motor thread in C++ code..." << std::endl;
     if (!motor_running)
     {
-        std::cout << "Motor running var set to true" << std::endl;
         motor_running = {true};
         motor_thread = std::thread(&Manager::start_auto_mode, this);
         std::cout << "Thread started..." << std::endl;
     }
-    
 }
 
 // Auto Mode Logic
 void Manager::start_auto_mode()
 {
-    py::gil_scoped_release lock_release;
+    // py::gil_scoped_release lock_release;
     
     // First time entering auto mode will init heading
     // After that this will be bypassed
