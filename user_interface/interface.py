@@ -141,6 +141,7 @@ class ManualPage(ttk.Frame):
 
         # selected_values = self.parent.rover_values
         selected_values = rover_values
+        rover, ip, heading = ("","","")
         if selected_values:
             rover, ip, heading = selected_values
         
@@ -171,6 +172,7 @@ class ManualPage(ttk.Frame):
 
     def update_labels(self):
         selected_values = rover_values
+        rover, ip, heading = ("","","")
         if selected_values:
             rover, ip, heading = selected_values
         self.connection_frame.config(text=f"Rover {rover}")
