@@ -101,6 +101,11 @@ class AutoModePage(ttk.Frame):
         rovers_frame = ttk.Labelframe(content_frame, text="Rovers")
         rovers_frame.pack()
 
+        blank_frame = ttk.Frame(content_frame)
+        blank_frame.pack()
+        blank_frame2 = ttk.Frame(content_frame)
+        blank_frame2.pack()
+
 
         columns = ("Rover", "Rover Ip", "Location")
         self.rovers_table = ttk.Treeview(rovers_frame, columns=columns, show="headings", height=10)
@@ -142,12 +147,14 @@ class ManualPage(ttk.Frame):
         super().__init__(parent)
 
         self.parent = parent
-
+        self.rover = 0
+        self.ip = ""
+        self.heading = 0
         # selected_values = self.parent.rover_values
         selected_values = rover_values
-        rover, ip, heading = ("","","")
+        # rover, ip, heading = ("","","")
         if selected_values:
-            rover, ip, heading = selected_values
+            self.rover, self.ip, self.heading = selected_values
         
         # Manual Mode Banner
         banner = ttk.Label(self, text="Manual Mode", font=("Arial", 30, "bold"), anchor="center")
@@ -156,19 +163,19 @@ class ManualPage(ttk.Frame):
         content_frame = ttk.Frame(self)
         content_frame.pack(expand=True,fill=BOTH,padx=20,pady=20)
 
-        self.connection_frame = ttk.Labelframe(content_frame,text=f"Rover {rover}")
+        self.connection_frame = ttk.Labelframe(content_frame,text=f"Rover {self.rover}")
         self.connection_frame.pack(side=LEFT,fill=BOTH,expand=True,padx=10)
 
         ip_label = ttk.Label(self.connection_frame,anchor=W,text="Rover IP:")
         ip_label.grid(row=1,column=1,pady=(50,0),padx=(30,0))
 
-        self.ip_value = ttk.Label(self.connection_frame,text= f"{ip}")
+        self.ip_value = ttk.Label(self.connection_frame,text= f"{self.ip}")
         self.ip_value.grid(row=1,column=2,pady=(50,0),padx=(30,0))
 
         self.loc_label = ttk.Label(self.connection_frame,anchor=W,text="Angular Location")
         self.loc_label.grid(row=2,column=1,pady=(50,0),padx=(50,0))
 
-        self.loc_value = ttk.Label(self.connection_frame,text=f"{heading}")
+        self.loc_value = ttk.Label(self.connection_frame,text=f"{self.heading}")
         self.loc_value.grid(row=2,column=2,pady=(50,0),padx=(50,0))
 
         self.button_frame = ttk.Frame(content_frame)
