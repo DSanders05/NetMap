@@ -35,7 +35,7 @@ class NetMapApp(ttk.Window):
         start_button = ttk.Button(frames["InitPage"], text="Start Auto Scan", command=lambda: self.start_scan())
         start_button.pack(pady=(60,0))
 
-        connect_button = ttk.Button(frames["AutoModePage"].option_frame, text="Connect", command=lambda: (self.stop_motor(), frames["AutoModePage"].target_rover(), frames["ManualPage"].update_labels(), self.show_frame("ManualPage")))
+        connect_button = ttk.Button(frames["AutoModePage"].option_frame, text="Connect", command=lambda: (self.stop_motor(), frames["AutoModePage"].target_rover(), frames["ManualPage"].update_labels(), print(rover_values), self.show_frame("ManualPage")))
         connect_button.pack(fill=X,pady=100)
 
         return_button = ttk.Button(frames["ManualPage"].button_frame,text="Return to Auto Mode",command=lambda:{self.show_frame("AutoModePage"),self.start_scan()})
@@ -124,10 +124,14 @@ class AutoModePage(ttk.Frame):
         self.rovers_table.insert("","end",values=(f"Rover {rover_num}",rover_ip,heading))
 
     def target_rover(self):
+        global rover_values
         selected_rover = self.rovers_table.focus()
+        print("seleted_rover: ", selected_rover)
         if selected_rover:
             # self.parent.rover_values = self.rovers_table.item(selected_rover,"values")
             rover_values = self.rovers_table.item(selected_rover,"values")
+            print("rover values: ", rover_values)
+            frames["ManualPage"].update_labels()
             return rover_values
         return None
 
@@ -155,7 +159,7 @@ class ManualPage(ttk.Frame):
         self.connection_frame = ttk.Labelframe(content_frame,text=f"Rover {rover}")
         self.connection_frame.pack(side=LEFT,fill=BOTH,expand=True,padx=10)
 
-        ip_label = ttk.Label(self.connection_frames,anchor=W,text="Rover IP:")
+        ip_label = ttk.Label(self.connection_frame,anchor=W,text="Rover IP:")
         ip_label.grid(row=1,column=1,pady=(50,0),padx=(30,0))
 
         self.ip_value = ttk.Label(self.connection_frame,text= f"{ip}")
@@ -171,10 +175,13 @@ class ManualPage(ttk.Frame):
         self.button_frame.pack(side=RIGHT,fill=BOTH,expand=True,padx=10)
 
     def update_labels(self):
+        global rover_values
         selected_values = rover_values
         rover, ip, heading = ("","","")
-        if selected_values:
-            rover, ip, heading = selected_values
+        if rover_values:
+            rover, ip, heading = rover_values
+        print("In update labels alue ", selected_values)
+        print("rov val ", rover_values)
         self.connection_frame.config(text=f"Rover {rover}")
         self.ip_value.config(text = f"{ip}")
         self.loc_value.config(text = f"{heading}")
