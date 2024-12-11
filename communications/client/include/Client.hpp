@@ -12,8 +12,6 @@ private:
 public:
     Client(const std::string& server_ip, int server_port);
 
-    // std::string attempt_connection();
-
     int attempt_connection();
 };
 #endif

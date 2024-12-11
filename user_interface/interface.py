@@ -19,15 +19,11 @@ class NetMapApp(ttk.Window):
     def __init__(self):
         super().__init__(title="NetMap Monitoring Tool", size=(800, 400), themename="superhero")
 
-        # Vars for page frame list, motor thread, and thread running flag (bool)
-        # self.frames = {}
         self.frame
-        # self.rover_values
 
         # Create page frames
         for PageClass in (InitPage, AutoModePage, ManualPage):
             page = PageClass(self)
-            # self.frames[PageClass.__name__] = page
             frames[PageClass.__name__] = page
             page.place(relwidth=1, relheight=1)
 
@@ -46,7 +42,6 @@ class NetMapApp(ttk.Window):
 
     # Swaps page frames
     def show_frame(self, page_name):
-        # frame = self.frames[page_name]
         self.frame = frames[page_name]
         self.frame.tkraise()
 
@@ -59,7 +54,6 @@ class NetMapApp(ttk.Window):
         # Starting auto mode in separate thread
         try:
             threading.Thread(target=manager.start_thread,daemon=True).start()
-            # manager.start_thread()
         except Exception as e:
             print(f"Error starting motor control loop: {e}")
 
@@ -133,7 +127,6 @@ class AutoModePage(ttk.Frame):
         selected_rover = self.rovers_table.focus()
         print("seleted_rover: ", selected_rover)
         if selected_rover:
-            # self.parent.rover_values = self.rovers_table.item(selected_rover,"values")
             rover_values = self.rovers_table.item(selected_rover,"values")
             print("rover values: ", rover_values)
             frames["ManualPage"].update_labels()
@@ -150,9 +143,7 @@ class ManualPage(ttk.Frame):
         self.rover = 0
         self.ip = ""
         self.heading = 0
-        # selected_values = self.parent.rover_values
         selected_values = rover_values
-        # rover, ip, heading = ("","","")
         if selected_values:
             self.rover, self.ip, self.heading = selected_values
         

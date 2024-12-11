@@ -11,7 +11,6 @@ private:
  public:
     Server();
     void start();
-    // std::string get_sig_str();
 };
 
 #endif

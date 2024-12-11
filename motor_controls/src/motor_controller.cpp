@@ -52,30 +52,6 @@ Motor_Controller::~Motor_Controller()
     release_controller(board_address);
 }
 
-// int Motor_Controller::initialize_motor_controller(int pulse, int limit_switch_pin, int direction)
-// {
-//     // This function establishes a connection between the 
-//     // PIGPIO daemon and the RPi
-//     board_address = {pigpio_start(NULL,NULL)};
-//     if (board_address < 0)
-//     {
-//         std::cout << "Unable to initialize Motor Controller GPIO." << std::endl;
-//         return -1;
-//     }
-//     control_mode={0}; // 0 - autonomous mode, 1 - manual mode
-//     clockwise={true};
-//     heading_initialized={false};
-    
-//     pulse_pin = {pulse};
-//     lim_sw_pin = {limit_switch_pin};
-//     direction_pin = {direction};
-
-//     std::cout << "Motor Controller GPIO initialized successfully. Board Number: " << board_address << std::endl;
-
-//     std::cout << "Pins have been set up." << std::endl;
-//     return 0;
-// }
-
 void Motor_Controller::initialize_heading()
 {
     // This function will run on initial startup of the antenna
@@ -91,21 +67,6 @@ void Motor_Controller::initialize_heading()
     
     std::cout << "Heading is initialized." << std::endl;
 }
-
-// int Motor_Controller::claim_pins()
-// {
-//     // This function sets the mode for all the pins to be used by the RPi
-//     // int resistor_set;
-
-//     set_mode(board_address,lim_sw_pin,PI_INPUT);
-//     set_mode(board_address,lim_sw_pin,PI_PUD_UP);
-    
-//     set_glitch_filter(board_address,5,0500);
-
-//     set_mode(board_address,pulse_pin,PI_INPUT);
-//     set_mode(board_address,direction_pin,PI_INPUT);
-//     return 0;
-// }
 
 void Motor_Controller::release_controller(int board_address)
 {
@@ -139,7 +100,6 @@ void Motor_Controller::rotate_to(int int_target)
 {
     // Change target to double
     double target = static_cast<double>(int_target);
-    // std::cout << "The provided target is: " << target << std::endl;
 
     // Determine number of steps to new target
     int difference = std::abs((get_heading() - target)/0.3);
@@ -150,7 +110,6 @@ void Motor_Controller::rotate_to(int int_target)
     {
         ctr_clockwise = {true};
         gpio_write(board_address,direction_pin,ctr_clockwise);
-        // std::cout << "Approaching target counter-clockwise." << std::endl;
 
         for (size_t i = 0; i <= difference; i++)
         {
@@ -161,7 +120,6 @@ void Motor_Controller::rotate_to(int int_target)
     else if (!ctr_clockwise)
     {
         gpio_write(board_address,direction_pin,ctr_clockwise);
-        // std::cout << "Approaching target clockwise." << std::endl;
 
         for (size_t i = 0; i <= difference; i++)
         {
@@ -173,7 +131,6 @@ void Motor_Controller::rotate_to(int int_target)
     {
         ctr_clockwise = {false};
         gpio_write(board_address,direction_pin,ctr_clockwise);
-        // std::cout << "Approaching target clockwise." << std::endl;
 
         for (size_t i = 0; i <= difference; i++)
         {
@@ -184,7 +141,6 @@ void Motor_Controller::rotate_to(int int_target)
     else if (ctr_clockwise)
     {
         gpio_write(board_address,direction_pin,ctr_clockwise);
-        // std::cout << "Approaching target counter clockwise." << std::endl;
 
         for (size_t i = 0; i <= difference; i++)
         {
@@ -192,8 +148,6 @@ void Motor_Controller::rotate_to(int int_target)
             set_heading(0.3f);
         }
     }
-
-    // std::cout << "After turning to target " << target << " degrees, the current heading is: " << get_heading() << std::endl;
 }
 
 void Motor_Controller::return_to_zero()
